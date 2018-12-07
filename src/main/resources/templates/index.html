@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <meta charset="utf-8"/>
+    <title>Add WebHook</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h1>Add WebHook</h1>
+        <form th:action="@{/}" th:method="post">
+            <div class="form-group">
+                <label for="fullName">Repository Name</label>
+                <input id="fullName" type="text" name="fullName" class="form-control" placeholder="i.e. spring-projects/spring-security">
+            </div>
+            <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+
+spring:
+  profiles:
+    active: local
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            scope: read:user,admin:repo_hook,read:org,repo
+        provider:
+          github:
+            user-name-attribute: login
+management:
+  info:
+    git:
+      mode: full

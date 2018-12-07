@@ -1,0 +1,38 @@
+package io.spring.github.security
+
+import io.spring.github.api.GitHubApi
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
+import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.stereotype.Component
+
+/**
+ * @author Rob Winch
+ */
+@Component
+class GitHubOAuth2UserService(val gitHubApi: GitHubApi) : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+    val delegate = DefaultOAuth2UserService()
+    override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
+        val result = delegate.loadUser(userRequest)!!
+        val isPivotalEmployee = gitHubApi.isMemberOfTeam(result.name, 482984, userRequest.accessToken.tokenValue)
+            .block()!!
+        if (isPivotalEmployee) {
+            val attributeName = userRequest.clientRegistration
+                    .providerDetails
+                    .userInfoEndpoint
+                    .userNameAttributeName
+            val authorities = result.authorities + SimpleGrantedAuthority("ROLE_SPRING")
+            return GitHubUser(DefaultOAuth2User(authorities, result.attributes, attributeName))
+        }
+        return GitHubUser(result)
+    }
+
+    class GitHubUser(oauth2User: OAuth2User) : OAuth2User by oauth2User {
+        fun getAvatarUrl() : String? {
+           return attributes.get("avatar_url")?.toString()
+        }
+    }
+}

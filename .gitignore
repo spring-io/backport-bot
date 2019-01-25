@@ -23,3 +23,7 @@ atlassian-ide-plugin.xml
 !etc/eclipse/.checkstyle
 .checkstyle
 s101plugin.state
+cf
+LICENSE
+NOTICE
+src/main/resources/application-local.yml

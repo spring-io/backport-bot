@@ -44,7 +44,7 @@ NOTE: The user that creates the OAuth application will need to be granted access
 The request can be made when the first user that is part of the spring team logs into the application by clicking the request button next to the spring-io organization.
 The request will then need to be confirmed before users are granted access.
 
-The credentials should be placed in `client-id` and `client-secret` within link:src/main/resources/application-local.yml[] which is setup to be ignored so you don't accidentally commit your credentials.
+The credentials should be placed in `client-id` and `client-secret` within link:blob/master/src/main/resources/application.yml[src/main/resources/application.yml] which is setup to be ignored so you don't accidentally commit your credentials.
 
 This is used to authenticate the user.
 The access token is then used to determine if the user is authorized by determining if they are part of the Spring team in spring-io.
@@ -55,7 +55,7 @@ See the comments in the file for additional details.
 
 The next step is to https://github.com/settings/tokens[generate a personal access token].
 
-The token should be placed in `personal-access-token` within link:src/main/resources/application-local.yml[] which is setup to be ignored so you don't accidentally commit your credentials.
+The token should be placed in `personal-access-token` within link:blob/master/src/main/resources/application.yml[src/main/resources/application.yml] which is setup to be ignored so you don't accidentally commit your credentials.
 
 This is used for editing issues. (spring-issuemaster) that is editing issues
 The token should have scope `public_repo`
@@ -67,7 +67,7 @@ The user used to create the token is who edits the issues.
 The last step is to generate a secure random secret that is used by https://developer.github.com/webhooks/securing/#setting-your-secret-token[GitHub's WebHooks]
 The application will setup the hooks with this value and also use the value to validate the signature passed into it.
 
-The secret should be placed in `webhook-secret` within link:src/main/resources/application-local.yml[] which is setup to be ignored so you don't accidentally commit your credentials.
+The secret should be placed in `webhook-secret` within link:blob/master/src/main/resources/application.yml[src/main/resources/application.yml] which is setup to be ignored so you don't accidentally commit your credentials.
 
 
 == Running Locally

@@ -240,8 +240,8 @@ class DefaultBackportServiceTests {
         whenever(github.closeIssue(any())).thenReturn(Mono.empty())
 
         StepVerifier.create(backport.createBackport(issueRef, milestoneNumber, pushEvent.pusher.name))
-            .expectNext(2)
-            .verifyComplete()
+                .expectNext(2)
+                .verifyComplete()
 
         val labelArgs = argumentCaptor<List<String>>()
         val createIssueArg = argumentCaptor<CreateIssue>()
@@ -256,6 +256,37 @@ class DefaultBackportServiceTests {
             assertThat(body).isEqualTo("Backport of gh-${issue.number}")
             assertThat(milestone).isEqualTo(milestoneNumber)
             assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backport")
+            assertThat(assignees).containsOnly(pushEvent.pusher.name)
+        }
+    }
+
+    // gh-9
+    @Test
+    fun createBackportWhenHasIsBackportedThenBackportNotIsBackported() {
+        val issue = Issue(issue.number, issue.title, issue.milestone, issue.labels + Issue.Label("is: backported"))
+        whenever(github.findIssue(any())).thenReturn(Mono.just(issue))
+        whenever(github.updateLabels(any(), any())).thenReturn(Mono.empty())
+        whenever(github.createIssue(any())).thenReturn(Mono.just(issue.number + 1))
+        whenever(github.comment(any(), any())).thenReturn(Mono.empty())
+        whenever(github.closeIssue(any())).thenReturn(Mono.empty())
+
+        StepVerifier.create(backport.createBackport(issueRef, milestoneNumber, pushEvent.pusher.name))
+                .expectNext(2)
+                .verifyComplete()
+
+        val labelArgs = argumentCaptor<List<String>>()
+        val createIssueArg = argumentCaptor<CreateIssue>()
+
+        verify(github).updateLabels(eq(issueRef), labelArgs.capture())
+        verify(github).createIssue(createIssueArg.capture())
+
+        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backported")
+        createIssueArg.firstValue.apply {
+            assertThat(ref).isEqualTo(issueRef.repository)
+            assertThat(title).isEqualTo(issue.title)
+            assertThat(body).isEqualTo("Backport of gh-${issue.number}")
+            assertThat(milestone).isEqualTo(milestoneNumber)
+            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "is: backported" + "is: backport")
             assertThat(assignees).containsOnly(pushEvent.pusher.name)
         }
     }

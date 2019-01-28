@@ -14,6 +14,8 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
 
     val backportLabelMatcher = "backport: (?<branch>.*?)".toRegex()
 
+    val LABEL_IS_BACKPORTED = "is: backported"
+
     override fun findBranchNameByLabelName(labelName: String): Mono<String> {
         return Mono.justOrEmpty(backportLabelMatcher.matchEntire(labelName)?.groups?.get("branch")?.value)
     }
@@ -85,8 +87,8 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
     override fun createBackport(fixedIssue: IssueRef, milestone: Int, assignee: String): Mono<Int> {
         return github.findIssue(fixedIssue)
                 .switchIfEmpty(Mono.error { IllegalStateException("Cannot find issue $fixedIssue") })
-                .flatMap { issue -> github.updateLabels(fixedIssue, issue.labels.map {l -> l.name } + arrayListOf("is: backported")).thenReturn(issue) }
-                .map { issue -> CreateIssue(fixedIssue.repository, issue.title, "Backport of gh-${fixedIssue.number}", milestone, issue.labels.map { l -> l.name }.filter { l -> !backportLabelMatcher.matches(l) } + arrayListOf("is: backport"), arrayListOf(assignee)) }
+                .flatMap { issue -> github.updateLabels(fixedIssue, issue.labels.map {l -> l.name } + arrayListOf(LABEL_IS_BACKPORTED)).thenReturn(issue) }
+                .map { issue -> CreateIssue(fixedIssue.repository, issue.title, "Backport of gh-${fixedIssue.number}", milestone, issue.labels.map { l -> l.name }.filter { n -> n != LABEL_IS_BACKPORTED}.filter { l -> !backportLabelMatcher.matches(l) } + arrayListOf("is: backport"), arrayListOf(assignee)) }
                 .flatMap { createIssue -> github.createIssue(createIssue) }
     }
 }

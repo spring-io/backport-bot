@@ -26,7 +26,7 @@ class IndexController(val gitHubApi: GitHubApi, val webHookSecret: GitHubWebHook
     }
 
     @PostMapping("/")
-    fun admin(@RequestParam fullName: String, request: HttpServletRequest, @RegisteredOAuth2AuthorizedClient authorizedClient: OAuth2AuthorizedClient): String {
+    fun admin(@RequestParam fullName: String, request: HttpServletRequest, @RegisteredOAuth2AuthorizedClient("github") authorizedClient: OAuth2AuthorizedClient): String {
         val hooksUrl = UriComponentsBuilder.fromHttpRequest(ServletServerHttpRequest(request))
                 .replacePath("/events/")
                 .build()

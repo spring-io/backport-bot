@@ -6,6 +6,9 @@
 </head>
 <body>
     <div layout:fragment="content">
+        <div class="alert alert-success" th:if="${param.success}">
+            A WebHook was successfully added to the repository.
+        </div>
         <h1>Add WebHook</h1>
         <form th:action="@{/}" th:method="post">
             <div class="form-group">

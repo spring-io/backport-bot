@@ -1,0 +1,19 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            # https://github.com/settings/developers
+            # NOTE: The client (user that created client id) must be granted permission to
+            #       access spring-io to read team information
+            client-id: replace-with-client-id
+            client-secret: replace-with-client-secret
+github:
+  webhook-secret: replace-with-secure-random-secret
+  issuemaster:
+    # https://github.com/settings/tokens
+    # Personal token created by the user (spring-issuemaster) that is editing issues
+    # The token should have scope public_repo
+    # The user should also have push (write) access to any repo so that it can edit issues
+    personal-access-token: replace-with-token

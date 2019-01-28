@@ -70,4 +70,5 @@ dependencies {
 	testImplementation('io.projectreactor:reactor-test')
 	testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
 	testImplementation "org.skyscreamer:jsonassert:1.5.0"
+	testCompile 'org.seleniumhq.selenium:htmlunit-driver'
 }

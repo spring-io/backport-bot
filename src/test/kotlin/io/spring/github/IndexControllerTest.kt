@@ -16,13 +16,11 @@
 
 package io.spring.github
 
-import com.gargoylesoftware.htmlunit.WebClient
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import io.spring.github.api.GitHubApi
 import io.spring.github.api.Permission
 import io.spring.github.webdriver.pages.IndexPage
-import org.assertj.core.api.Assertions.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openqa.selenium.WebDriver
@@ -38,6 +36,8 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.Instant
@@ -49,6 +49,10 @@ import java.time.Instant
 @AutoConfigureMockMvc
 @RunWith(SpringRunner::class)
 class IndexControllerTest {
+
+    @Autowired
+    lateinit var mockMvc: MockMvc
+
     @Autowired
     lateinit var webDriver: WebDriver
 
@@ -57,6 +61,12 @@ class IndexControllerTest {
 
     @MockBean
     lateinit var authzClient: OAuth2AuthorizedClientRepository
+
+    @Test
+    fun indexWhenNotAuthenticatedThenRequestsOAuth() {
+        mockMvc.perform(get("/"))
+                .andExpect(redirectedUrl("http://localhost/oauth2/authorization/github"))
+    }
 
     @Test
     @WithMockUser(roles = arrayOf("SPRING"))
@@ -81,6 +91,7 @@ class IndexControllerTest {
                 .submit()
                 .assertSuccess()
     }
+
     @Test
     @WithMockUser(roles = arrayOf("SPRING"))
     fun indexWhenWriteThenSuccess() {

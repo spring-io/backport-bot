@@ -27,7 +27,11 @@ import org.openqa.selenium.WebDriver
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.springframework.context.annotation.Bean
+import org.springframework.core.Ordered
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
@@ -38,9 +42,14 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.Instant
+import javax.servlet.*
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.HttpServletResponseWrapper
 
 /**
  * @author Rob Winch
@@ -66,6 +75,12 @@ class IndexControllerTest {
     fun indexWhenNotAuthenticatedThenRequestsOAuth() {
         mockMvc.perform(get("/"))
                 .andExpect(redirectedUrl("http://localhost/oauth2/authorization/github"))
+    }
+
+    @Test
+    @WithMockUser
+    fun indexWhenNotAuthorizedThenForbidden() {
+        mockMvc.perform(get("/")).andExpect(status().isForbidden)
     }
 
     @Test
@@ -114,5 +129,39 @@ class IndexControllerTest {
                 .repositoryName("spring-projects/spring-security")
                 .submit()
                 .assertSuccess()
+    }
+
+    @TestConfiguration
+    class Go {
+        @Bean
+        fun go(): FilterRegistrationBean<Error> {
+            val result = FilterRegistrationBean<Error>(Error())
+            result.order = Ordered.HIGHEST_PRECEDENCE
+            return result
+        }
+
+        class Error: Filter {
+            override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+                chain.doFilter(request, ErrorWrapper(response as HttpServletResponse, request as HttpServletRequest))
+            }
+        }
+
+        class ErrorWrapper(response: HttpServletResponse, val request: HttpServletRequest) : HttpServletResponseWrapper(response) {
+            override fun sendError(sc: Int) {
+//                super.sendError(sc)
+                request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, sc)
+                request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, request.requestURI)
+                request.getRequestDispatcher("/error").forward(request, response)
+            }
+
+            override fun sendError(sc: Int, msg: String?) {
+//                super.sendError(sc, msg)
+                status = sc
+                request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, sc)
+                request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, request.requestURI)
+                request.setAttribute(RequestDispatcher.ERROR_MESSAGE, msg)
+                request.getRequestDispatcher("/error").forward(request, response)
+            }
+        }
     }
 }

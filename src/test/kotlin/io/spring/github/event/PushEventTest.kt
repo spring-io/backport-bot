@@ -16,7 +16,7 @@
 
 package io.spring.github
 
-import io.spring.github.api.*
+import io.spring.github.event.PushEvent
 import org.assertj.core.api.Assertions.*
 import org.junit.Test
 

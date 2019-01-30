@@ -17,8 +17,8 @@
 package io.spring.github
 
 import com.nhaarman.mockitokotlin2.*
-import io.spring.github.api.IssueEvent
-import io.spring.github.api.PushEvent
+import io.spring.github.event.IssueEvent
+import io.spring.github.event.PushEvent
 import io.spring.github.event.GitHubHooksController
 import io.spring.github.event.GithubEventService
 import org.assertj.core.api.Assertions.assertThat

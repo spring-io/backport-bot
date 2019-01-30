@@ -19,6 +19,8 @@ package io.spring.github
 import com.nhaarman.mockitokotlin2.*
 import io.spring.github.api.*
 import io.spring.github.event.DefaultBackportService
+import io.spring.github.event.IssueEvent
+import io.spring.github.event.PushEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import reactor.core.publisher.Flux

@@ -16,8 +16,6 @@
 
 package io.spring.github.event
 
-import io.spring.github.api.IssueEvent
-import io.spring.github.api.PushEvent
 import reactor.core.publisher.Mono
 
 /**

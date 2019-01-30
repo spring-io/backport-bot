@@ -16,8 +16,6 @@
 
 package io.spring.github.event
 
-import io.spring.github.api.IssueEvent
-import io.spring.github.api.PushEvent
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody

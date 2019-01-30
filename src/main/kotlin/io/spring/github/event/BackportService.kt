@@ -17,11 +17,8 @@
 package io.spring.github.event
 
 import io.spring.github.api.BranchRef
-import io.spring.github.api.IssueEvent
 import io.spring.github.api.IssueRef
-import io.spring.github.api.PushEvent
 import reactor.core.publisher.Mono
-import java.util.function.Predicate
 
 /**
  * @author Rob Winch

@@ -20,6 +20,7 @@ import com.nhaarman.mockitokotlin2.*
 import io.spring.github.api.*
 import io.spring.github.event.BackportService
 import io.spring.github.event.DefaultGithubEventService
+import io.spring.github.event.IssueEvent
 import org.assertj.core.api.Assertions.*
 import org.junit.Test
 import reactor.core.publisher.Mono

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.spring.github.api
+package io.spring.github.event
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import reactor.core.publisher.Mono
+import io.spring.github.api.Issue
+import io.spring.github.api.IssueRef
+import io.spring.github.api.RepositoryRef
 
 /**
  * @author Rob Winch

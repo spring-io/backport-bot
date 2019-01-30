@@ -56,6 +56,7 @@ class SecurityConfig(val userService : OAuth2UserService<OAuth2UserRequest,OAuth
                 .ignoringRequestMatchers(eventsMatcher)
                 .and()
             .authorizeRequests()
+                .mvcMatchers("/webjars/**", "/assets/**", "/error/**").permitAll()
                 .mvcMatchers("/events/**").access("@gitHubSecurity.check(request)")
                 .anyRequest().hasRole("SPRING")
                 .and()

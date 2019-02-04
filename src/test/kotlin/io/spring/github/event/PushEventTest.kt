@@ -72,6 +72,24 @@ class PushEventTest {
         assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
     }
 
+    @Test
+    fun getFixedIssueIdsWhenSubjectAndUsesClosesThenFindValues() {
+        val e = pushEvent("Subject\n\nCloses: gh-123\r\n")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+    }
+
+    @Test
+    fun getFixedIssueIdsWhenSubjectAndUsesClosesAndNoColonThenFindValues() {
+        val e = pushEvent("Subject\n\nCloses gh-123\r\n")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+    }
+
+    @Test
+    fun getFixedIssueIdsWhenSubjectAndUsesLowercaseClosesThenFindValues() {
+        val e = pushEvent("Subject\n\ncloses gh-123\r\n")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+    }
+
     fun pushEvent(commitMessage : String) : PushEvent {
         val commits = listOf(PushEvent.Commit("sha", commitMessage))
         return PushEvent("master", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), commits)

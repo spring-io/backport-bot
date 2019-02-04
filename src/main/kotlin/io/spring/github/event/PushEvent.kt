@@ -34,7 +34,7 @@ class PushEvent(val ref : String, val repository : Repository, val pusher : Push
     }
 
     data class Commit(val id : String, val message : String) {
-        val r = """.*?Fixes:?\s+(gh\-|#)(?<id>\d+)(\r?\n)*""".toRegex(RegexOption.DOT_MATCHES_ALL)
+        val r = """.*?(Fixes|Closes):?\s+(gh\-|#)(?<id>\d+)(\r?\n)*""".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 
         fun getFixIssueId() : Int? {
             return r.matchEntire(message)?.groups?.get("id")?.value?.toInt()

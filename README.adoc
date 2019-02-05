@@ -12,11 +12,11 @@ In either case the following logic is used:
 * If backport issue does not exist:
   * Create a new backport issue with the additional label `type: backport`
   * Update the existing issue with the label `status: backported`
-* Automatically remove the `backport: <branch-name>` label from the existing issue
+* Automatically remove the `for: backport-to-<branch-name>` label from the existing issue
 
 === Via Labels
 
-You can add a label in the form of `backport: <branch-name>` (i.e. backport: 5.1.x) and
+You can add a label in the form of `for: backport-to-<branch-name>` (i.e. for: backport-to-5.1.x) and
 adding the label to a ticket will create a backport for the branch `<branch-name` (i.e. 5.1.x).
 
 === Pushing to Branch

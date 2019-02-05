@@ -24,9 +24,9 @@
     <title>You Have Been Logged Out</title>
 </head>
 <body>
-<div class="container">
-<h1>Success</h1>
-<p>You have been logged out. <a th:href="@{/}">Click Here</a> to log in again.</p>
-</div>
+    <div layout:fragment="content">
+        <h1>Success</h1>
+        <p>You have been logged out. <a th:href="@{/}">Click Here</a> to log in again.</p>
+    </div>
 </body>
 </html>

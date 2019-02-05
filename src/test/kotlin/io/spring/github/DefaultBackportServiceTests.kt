@@ -37,7 +37,7 @@ class DefaultBackportServiceTests {
     val milestoneNumber = 10
     val repository = IssueEvent.Repository("rwinch/test")
     val sender = IssueEvent.Sender("rwinch")
-    val backportLabel = IssueEvent.Label("backport: 1.0.x")
+    val backportLabel = IssueEvent.Label("for: backport-to-1.0.x")
     val issue = Issue(1, "Title", Issue.Milestone(milestoneNumber), listOf(Issue.Label("Label")))
     val event = IssueEvent("labeled", repository, sender, backportLabel, issue)
     val pushEvent = PushEvent("refs/head/5.1.x", PushEvent.Repository(repository.fullName), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("sha", "Fixes: gh-1")))
@@ -58,7 +58,7 @@ class DefaultBackportServiceTests {
 
     @Test
     fun findBranchNameByLabelNameWhenMatchThenFound() {
-        assertThat(this.backport.findBranchNameByLabelName("backport: 1.0.x").block()).isEqualTo("1.0.x")
+        assertThat(this.backport.findBranchNameByLabelName(backportLabel.name).block()).isEqualTo("1.0.x")
     }
 
     @Test
@@ -267,13 +267,13 @@ class DefaultBackportServiceTests {
         verify(github).updateLabels(eq(issueRef), labelArgs.capture())
         verify(github).createIssue(createIssueArg.capture())
 
-        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backported")
+        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "status: backported")
         createIssueArg.firstValue.apply {
             assertThat(ref).isEqualTo(issueRef.repository)
             assertThat(title).isEqualTo(issue.title)
             assertThat(body).isEqualTo("Backport of gh-${issue.number}")
             assertThat(milestone).isEqualTo(milestoneNumber)
-            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backport")
+            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "type: backport")
             assertThat(assignees).containsOnly(pushEvent.pusher.name)
         }
     }
@@ -281,7 +281,7 @@ class DefaultBackportServiceTests {
     // gh-9
     @Test
     fun createBackportWhenHasIsBackportedThenBackportNotIsBackported() {
-        val issue = Issue(issue.number, issue.title, issue.milestone, issue.labels + Issue.Label("is: backported"))
+        val issue = Issue(issue.number, issue.title, issue.milestone, issue.labels + Issue.Label("status: backported"))
         whenever(github.findIssue(any())).thenReturn(Mono.just(issue))
         whenever(github.updateLabels(any(), any())).thenReturn(Mono.empty())
         whenever(github.createIssue(any())).thenReturn(Mono.just(issue.number + 1))
@@ -298,13 +298,13 @@ class DefaultBackportServiceTests {
         verify(github).updateLabels(eq(issueRef), labelArgs.capture())
         verify(github).createIssue(createIssueArg.capture())
 
-        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backported")
+        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "status: backported")
         createIssueArg.firstValue.apply {
             assertThat(ref).isEqualTo(issueRef.repository)
             assertThat(title).isEqualTo(issue.title)
             assertThat(body).isEqualTo("Backport of gh-${issue.number}")
             assertThat(milestone).isEqualTo(milestoneNumber)
-            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "is: backported" + "is: backport")
+            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "status: backported" + "type: backport")
             assertThat(assignees).containsOnly(pushEvent.pusher.name)
         }
     }

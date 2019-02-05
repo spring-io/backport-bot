@@ -37,7 +37,7 @@ class DefaultBackportServiceTests {
     val milestoneNumber = 10
     val repository = IssueEvent.Repository("rwinch/test")
     val sender = IssueEvent.Sender("rwinch")
-    val backportLabel = IssueEvent.Label("backport: 1.0.x")
+    val backportLabel = IssueEvent.Label("for: backport-to-1.0.x")
     val issue = Issue(1, "Title", Issue.Milestone(milestoneNumber), listOf(Issue.Label("Label")))
     val event = IssueEvent("labeled", repository, sender, backportLabel, issue)
     val pushEvent = PushEvent("refs/head/5.1.x", PushEvent.Repository(repository.fullName), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("sha", "Fixes: gh-1")))
@@ -58,7 +58,7 @@ class DefaultBackportServiceTests {
 
     @Test
     fun findBranchNameByLabelNameWhenMatchThenFound() {
-        assertThat(this.backport.findBranchNameByLabelName("backport: 1.0.x").block()).isEqualTo("1.0.x")
+        assertThat(this.backport.findBranchNameByLabelName(backportLabel.name).block()).isEqualTo("1.0.x")
     }
 
     @Test

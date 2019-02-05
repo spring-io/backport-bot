@@ -28,7 +28,7 @@ import java.util.*
 @Component
 class DefaultBackportService(val github: GitHubApi) : BackportService {
 
-    val backportLabelMatcher = "backport: (?<branch>.*?)".toRegex()
+    val backportLabelMatcher = "for: backport\\-to\\-(?<branch>.*?)".toRegex()
 
     val LABEL_STATUS_BACKPORTED = "status: backported"
 

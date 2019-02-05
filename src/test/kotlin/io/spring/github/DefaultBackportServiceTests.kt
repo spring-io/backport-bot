@@ -267,7 +267,7 @@ class DefaultBackportServiceTests {
         verify(github).updateLabels(eq(issueRef), labelArgs.capture())
         verify(github).createIssue(createIssueArg.capture())
 
-        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backported")
+        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "status: backported")
         createIssueArg.firstValue.apply {
             assertThat(ref).isEqualTo(issueRef.repository)
             assertThat(title).isEqualTo(issue.title)
@@ -281,7 +281,7 @@ class DefaultBackportServiceTests {
     // gh-9
     @Test
     fun createBackportWhenHasIsBackportedThenBackportNotIsBackported() {
-        val issue = Issue(issue.number, issue.title, issue.milestone, issue.labels + Issue.Label("is: backported"))
+        val issue = Issue(issue.number, issue.title, issue.milestone, issue.labels + Issue.Label("status: backported"))
         whenever(github.findIssue(any())).thenReturn(Mono.just(issue))
         whenever(github.updateLabels(any(), any())).thenReturn(Mono.empty())
         whenever(github.createIssue(any())).thenReturn(Mono.just(issue.number + 1))
@@ -298,13 +298,13 @@ class DefaultBackportServiceTests {
         verify(github).updateLabels(eq(issueRef), labelArgs.capture())
         verify(github).createIssue(createIssueArg.capture())
 
-        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backported")
+        assertThat(labelArgs.firstValue).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "status: backported")
         createIssueArg.firstValue.apply {
             assertThat(ref).isEqualTo(issueRef.repository)
             assertThat(title).isEqualTo(issue.title)
             assertThat(body).isEqualTo("Backport of gh-${issue.number}")
             assertThat(milestone).isEqualTo(milestoneNumber)
-            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "is: backported" + "is: backport")
+            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "status: backported" + "is: backport")
             assertThat(assignees).containsOnly(pushEvent.pusher.name)
         }
     }

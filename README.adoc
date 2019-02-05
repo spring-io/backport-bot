@@ -17,7 +17,7 @@ In either case the following logic is used:
 === Via Labels
 
 You can add a label in the form of `for: backport-to-<branch-name>` (i.e. for: backport-to-5.1.x) and
-adding the label to a ticket will create a backport for the branch `<branch-name` (i.e. 5.1.x).
+adding the label to a ticket will create a backport for the branch `<branch-name>` (i.e. 5.1.x).
 
 === Pushing to Branch
 

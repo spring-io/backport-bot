@@ -273,7 +273,7 @@ class DefaultBackportServiceTests {
             assertThat(title).isEqualTo(issue.title)
             assertThat(body).isEqualTo("Backport of gh-${issue.number}")
             assertThat(milestone).isEqualTo(milestoneNumber)
-            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "is: backport")
+            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } + "type: backport")
             assertThat(assignees).containsOnly(pushEvent.pusher.name)
         }
     }
@@ -304,7 +304,7 @@ class DefaultBackportServiceTests {
             assertThat(title).isEqualTo(issue.title)
             assertThat(body).isEqualTo("Backport of gh-${issue.number}")
             assertThat(milestone).isEqualTo(milestoneNumber)
-            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "status: backported" + "is: backport")
+            assertThat(labels).containsOnlyElementsOf(issue.labels.map { n -> n.name } - "status: backported" + "type: backport")
             assertThat(assignees).containsOnly(pushEvent.pusher.name)
         }
     }

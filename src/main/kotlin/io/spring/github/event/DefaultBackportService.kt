@@ -102,11 +102,11 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
     }
 
     @Override
-    override fun createBackport(fixedIssue: IssueRef, milestone: Int, assignee: String): Mono<Int> {
+    override fun createBackport(fixedIssue: IssueRef, milestone: Int, assignees: List<String>): Mono<Int> {
         return github.findIssue(fixedIssue)
                 .switchIfEmpty(Mono.error { IllegalStateException("Cannot find issue $fixedIssue") })
                 .flatMap { issue -> github.updateLabels(fixedIssue, issue.labels.map {l -> l.name } + arrayListOf(LABEL_STATUS_BACKPORTED)).thenReturn(issue) }
-                .map { issue -> CreateIssue(fixedIssue.repository, issue.title, "Backport of gh-${fixedIssue.number}", milestone, issue.labels.map { l -> l.name }.filter { n -> n != LABEL_STATUS_BACKPORTED}.filter { l -> !backportLabelMatcher.matches(l) } + arrayListOf(LABEL_TYPE_BACKPORT), arrayListOf(assignee)) }
+                .map { issue -> CreateIssue(fixedIssue.repository, issue.title, "Backport of gh-${fixedIssue.number}", milestone, issue.labels.map { l -> l.name }.filter { n -> n != LABEL_STATUS_BACKPORTED}.filter { l -> !backportLabelMatcher.matches(l) } + arrayListOf(LABEL_TYPE_BACKPORT), assignees) }
                 .flatMap { createIssue -> github.createIssue(createIssue) }
     }
 }

@@ -38,7 +38,7 @@ interface BackportService {
     /**
      * Creates a backport issue
      */
-    fun createBackport(fixedIssue: IssueRef, milestone: Int, assignee: String): Mono<Int>
+    fun createBackport(fixedIssue: IssueRef, milestone: Int, assignees: List<String>): Mono<Int>
 
     /**
      If found, removes a label from an issue

@@ -30,7 +30,7 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
         return findBranchFromLabeledIssueEvent(issueEvent)
             .flatMap { branch ->
                 backport.removeLabel(issueEvent.getIssueRef(), issueEvent.label?.name!!)
-                        .then(backport(branch, issueEvent.issue.number, issueEvent.sender.login))
+                        .then(backport(branch, issueEvent.issue.number))
             }
             .defaultIfEmpty(false)
     }
@@ -47,11 +47,11 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
                 .map { branchName -> BranchRef(issueEvent.getRepositoryRef(), branchName) }
     }
 
-    private fun backport(branch: BranchRef, issueNumber : Int, login : String) : Mono<Boolean> {
+    private fun backport(branch: BranchRef, issueNumber : Int) : Mono<Boolean> {
         val issue = IssueRef(branch.repository, issueNumber)
         return backport.findMilestoneNumber(branch)
             .filterWhen { milestoneNumber -> backport.isIssueForMilestone(issue, milestoneNumber).map { isIssue -> !isIssue } }
-            .flatMap { milestoneNumber -> backport.createBackport(issue, milestoneNumber, login).then(Mono.just(true)) }
+            .flatMap { milestoneNumber -> backport.createBackport(issue, milestoneNumber, listOf()).then(Mono.just(true)) }
             .defaultIfEmpty(false)
     }
 
@@ -66,7 +66,7 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
                     .flatMap { fixedCommit ->
                         val issueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
                 backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber)
-                            .switchIfEmpty(backport.createBackport(issueRef, milestoneNumber, pushEvent.pusher.name))
+                            .switchIfEmpty(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
                             .flatMap { issueNumber ->
                                 backport.closeBackport(IssueRef(githubRef.repository, issueNumber), fixedCommit.id).then(Mono.just(true))
                             }

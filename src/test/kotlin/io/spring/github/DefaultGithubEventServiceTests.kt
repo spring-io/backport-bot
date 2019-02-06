@@ -110,6 +110,6 @@ class DefaultGithubEventServiceTests {
                 .expectNext(true)
                 .verifyComplete()
 
-        verify(backports).createBackport(any(), any(), any())
+        verify(backports).createBackport(any(), any(), eq(emptyList()))
     }
 }

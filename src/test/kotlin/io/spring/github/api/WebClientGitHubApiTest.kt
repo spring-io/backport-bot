@@ -1702,6 +1702,82 @@ class WebClientGitHubApiTest {
         assertThat(this.server.takeRequest().requestUrl.url().toExternalForm()).isEqualTo(next)
     }
 
+    @Test
+    fun findLabelsWhenSinglePageThenWorks() {
+        enqueue("""[
+          {
+            "id": 208045946,
+            "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+            "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+            "name": "bug",
+            "description": "Something isn't working",
+            "color": "f29513",
+            "default": true
+          },
+          {
+            "id": 208045947,
+            "node_id": "MDU6TGFiZWwyMDgwNDU5NDc=",
+            "url": "https://api.github.com/repos/octocat/Hello-World/labels/enhancement",
+            "name": "enhancement",
+            "description": "New feature or request",
+            "color": "a2eeef",
+            "default": false
+          }
+        ]""")
+
+        val labels = this.github.findLabels(repository)
+                .map { label -> label.name }
+                .collectList()
+                .block()
+
+        assertThat(labels).containsOnly("bug", "enhancement")
+    }
+
+    @Test
+    fun findLabelsWhenPagedThenWorks() {
+        val baseUrl = this.server.url("")
+        val next = "${baseUrl}/resource?page=2"
+        this.server.enqueue(response("""[
+          {
+            "id": 208045946,
+            "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+            "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+            "name": "bug",
+            "description": "Something isn't working",
+            "color": "f29513",
+            "default": true
+          }
+        ]""").setHeader("Link", """<${next}>; rel="next", <${baseUrl}/resource?page=5>; rel="last""""))
+        this.server.enqueue(response("""[
+          {
+            "id": 208045947,
+            "node_id": "MDU6TGFiZWwyMDgwNDU5NDc=",
+            "url": "https://api.github.com/repos/octocat/Hello-World/labels/enhancement",
+            "name": "enhancement",
+            "description": "New feature or request",
+            "color": "a2eeef",
+            "default": false
+          }
+        ]""").setHeader("Link", """<${next}>; rel="next", <${baseUrl}/resource?page=5>; rel="last""""))
+        enqueue("""[
+          {
+            "id": 56789,
+            "node_id": "SFLDJFSDLKJ=",
+            "url": "https://api.github.com/repos/octocat/Hello-World/labels/another",
+            "name": "another",
+            "description": "Another",
+            "color": "f29513",
+            "default": false
+          }
+        ]""")
+
+        val labels = this.github.findLabels(repository)
+                .map { label -> label.name }
+                .collectList()
+                .block()
+        assertThat(labels).containsOnly("bug", "enhancement", "another")
+    }
+
     fun enqueueNotFound() {
         this.server.enqueue(MockResponse()
             .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)

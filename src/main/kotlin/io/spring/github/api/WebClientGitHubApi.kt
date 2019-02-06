@@ -297,6 +297,38 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
         }
     }
 
+    override fun findLabels(repositoryRef: RepositoryRef): Flux<Label> {
+        val uri = UriComponentsBuilder.fromUriString(baseGitHubUrl)
+                .path("/repos/${repositoryRef.fullName}/labels")
+                .build()
+                .toUri()
+        return findLabels(uri)
+                .flatMapMany(label())
+    }
+
+    private fun findLabels(uri: URI): Mono<ClientResponse> {
+        return webClient.get()
+                .uri(uri)
+                .exchange()
+    }
+
+    private fun label(): (ClientResponse) -> Flux<Label> {
+        return { e ->
+            val status = e.statusCode()
+            if (status.is2xxSuccessful) {
+                val body = e.bodyToFlux<Label>()
+                val link = next(e.headers().asHttpHeaders())
+                if (link == null) {
+                    body
+                } else {
+                    body.concatWith(findIssueTimeline(URI.create(link)).flatMapMany (label()))
+                }
+            } else {
+                Flux.concat(error(e, "Cannot not get the labels"))
+            }
+        }
+    }
+
     private fun next(httpHeaders : HttpHeaders) : String? {
         return httpHeaders.getFirst("Link")?.replace(""".*?<(.*?)>; rel="next".*""".toRegex(), "$1")
     }

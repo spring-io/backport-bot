@@ -70,4 +70,9 @@ interface GitHubApi {
     fun updateLabels(issueRef : IssueRef, labels: List<String>): Mono<Void>
 
     fun saveHook(saveHook: SaveHook): Mono<Void>
+
+    /**
+     * Finds all the labels for a Repository
+     */
+    fun findLabels(repositoryRef: RepositoryRef): Flux<Label>
 }

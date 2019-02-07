@@ -115,6 +115,6 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
         return this.github.findLabels(repositoryRef)
                 .map { label -> label.name }
                 .concatMap { labelName -> findBranchNameByLabelName(labelName) }
-                .map { branchName -> BranchRef(repositoryRef, branchName) }
+                .map { branchName -> BranchRef(repositoryRef, "refs/heads/$branchName") }
     }
 }

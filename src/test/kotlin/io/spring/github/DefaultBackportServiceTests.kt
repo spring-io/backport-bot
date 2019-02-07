@@ -359,6 +359,6 @@ class DefaultBackportServiceTests {
                 .collectList()
                 .block()
 
-        assertThat(labels).containsOnly("1.0.x")
+        assertThat(labels).containsOnly("refs/heads/1.0.x")
     }
 }

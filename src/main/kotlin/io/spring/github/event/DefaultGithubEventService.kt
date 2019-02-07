@@ -108,9 +108,6 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
         }
         val branchRef = pushEvent.getBranchRef()
         return this.backport.findBackportBranches(branchRef.repository)
-            .filter { branch -> branch == branchRef }
-            .next()
-            .map { _ -> true }
-            .defaultIfEmpty(false)
+            .any { branch -> branch == branchRef }
     }
 }

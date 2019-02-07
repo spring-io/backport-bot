@@ -56,27 +56,27 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
     }
 
     override fun backport(pushEvent : PushEvent) : Mono<Boolean> {
-        val githubRef = pushEvent.getBranchRef()
-        val fixedCommits = pushEvent.getFixCommits()
+        val branchRef = pushEvent.getBranchRef()
         return isBackport(pushEvent)
             .filter { shouldBackport -> shouldBackport }
-            .flatMap { _ -> backport.findMilestoneNumber(githubRef) }
+            .flatMap { _ -> backport.findMilestoneNumber(branchRef) }
             .flatMap { milestoneNumber ->
-                backport(fixedCommits, githubRef, milestoneNumber, pushEvent)
+                backport(pushEvent, milestoneNumber)
             }
             .defaultIfEmpty(false)
     }
 
-    private fun backport(fixedCommits: List<PushEvent.Commit>, githubRef: BranchRef, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {
-        return Flux.fromIterable(fixedCommits)
+    private fun backport(pushEvent: PushEvent, milestoneNumber: Int): Mono<Boolean> {
+        return Flux.fromIterable(pushEvent.getFixCommits())
                 .flatMap { fixedCommit ->
-                    backport(githubRef, fixedCommit, milestoneNumber, pushEvent)
+                    backport(pushEvent, fixedCommit, milestoneNumber)
                 }
                 .then(Mono.just(true))
     }
 
-    private fun backport(githubRef: BranchRef, fixedCommit: PushEvent.Commit, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {
-        val fixedIssueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
+    private fun backport(pushEvent: PushEvent, fixedCommit: PushEvent.Commit, milestoneNumber: Int): Mono<Boolean> {
+        val branchRef = pushEvent.getBranchRef()
+        val fixedIssueRef = IssueRef(branchRef.repository, fixedCommit.getFixIssueId()!!)
         return backport.findBackportedIssueForMilestoneNumber(fixedIssueRef, milestoneNumber)
                 .switchIfEmpty(backport.createBackport(fixedIssueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
                 .flatMap { issueRef ->

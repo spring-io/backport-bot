@@ -21,8 +21,10 @@ import io.spring.github.api.*
 import io.spring.github.event.BackportService
 import io.spring.github.event.DefaultGithubEventService
 import io.spring.github.event.IssueEvent
+import io.spring.github.event.PushEvent
 import org.assertj.core.api.Assertions.*
 import org.junit.Test
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
@@ -111,5 +113,42 @@ class DefaultGithubEventServiceTests {
                 .verifyComplete()
 
         verify(backports).createBackport(any(), any(), eq(emptyList()))
+    }
+
+    @Test
+    fun backportPushWhenMatchesBranchThenTrue() {
+        val repositoryRef = RepositoryRef("spring-projects/spring-security")
+        whenever(backports.findBackportBranches(any())).thenReturn(Flux.just(BranchRef(repositoryRef, "1.0.x"), BranchRef(repositoryRef, "2.0.x")))
+        whenever(backports.findMilestoneNumber(any())).thenReturn(Mono.just(1))
+        whenever(backports.findBackportedIssueForMilestoneNumber(any(), any())).thenReturn(Mono.empty())
+        whenever(backports.createBackport(any(), any(), any())).thenReturn(Mono.just(2))
+        whenever(backports.closeBackport(any(), any())).thenReturn(Mono.empty())
+        val pushEvent = PushEvent("2.0.x", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("123", "Fixes: gh-123")))
+
+        StepVerifier.create(events.backport(pushEvent))
+                .expectNext(true)
+                .verifyComplete()
+    }
+
+    @Test
+    fun backportPushWhenNotMatchesBranchThenFalse() {
+        val repositoryRef = RepositoryRef("spring-projects/spring-security")
+        whenever(backports.findBackportBranches(any())).thenReturn(Flux.just(BranchRef(repositoryRef, "1.0.x"), BranchRef(repositoryRef, "2.0.x")))
+        val pushEvent = PushEvent("3.0.x", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("123", "Fixes: gh-123")))
+
+        StepVerifier.create(events.backport(pushEvent))
+                .expectNext(false)
+                .verifyComplete()
+    }
+
+    @Test
+    fun backportPushWhenNoFixCommitsThenFalse() {
+        val repositoryRef = RepositoryRef("spring-projects/spring-security")
+        whenever(backports.findBackportBranches(any())).thenReturn(Flux.just(BranchRef(repositoryRef, "1.0.x"), BranchRef(repositoryRef, "2.0.x")))
+        val pushEvent = PushEvent("2.0.x", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("123", "No Fix")))
+
+        StepVerifier.create(events.backport(pushEvent))
+                .expectNext(false)
+                .verifyComplete()
     }
 }

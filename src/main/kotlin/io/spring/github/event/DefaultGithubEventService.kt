@@ -77,18 +77,20 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
     }
 
     /**
-     * Determines if this a PushEvent for a backport. Should be a branch ending in .x, have
+     * Determines if this a PushEvent for a backport. Should be a branch that matches a
+     * branch from [BackportService.findBackportBranches] and have
      * a commit that has Fixes: gh-<number> in it
      */
     private fun isBackport(pushEvent: PushEvent): Mono<Boolean> {
-        val githubRef = pushEvent.getBranchRef()
-        if (!githubRef.ref.endsWith(".x")) {
-            return Mono.just(false)
-        }
         val fixedCommits = pushEvent.getFixCommits()
         if (fixedCommits.isEmpty()) {
             return Mono.just(false)
         }
-        return Mono.just(true)
+        val branchRef = pushEvent.getBranchRef()
+        return this.backport.findBackportBranches(branchRef.repository)
+            .filter { branch -> branch == branchRef }
+            .next()
+            .map { branchRef -> true }
+            .defaultIfEmpty(false)
     }
 }

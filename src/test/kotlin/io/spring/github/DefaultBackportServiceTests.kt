@@ -349,4 +349,16 @@ class DefaultBackportServiceTests {
         verify(github).comment(issueRef, "Fixed via 123")
         verify(github).closeIssue(issueRef)
     }
+
+    @Test
+    fun findBackportBranches() {
+        val backportLabelName = backportLabel.name
+        whenever(github.findLabels(any())).thenReturn(Flux.just(Label("not"), Label(backportLabelName)))
+        val labels = backport.findBackportBranches(repositoryRef)
+                .map { b -> b.ref }
+                .collectList()
+                .block()
+
+        assertThat(labels).containsOnly("1.0.x")
+    }
 }

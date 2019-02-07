@@ -109,4 +109,11 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
                 .map { issue -> CreateIssue(fixedIssue.repository, issue.title, "Backport of gh-${fixedIssue.number}", milestone, issue.labels.map { l -> l.name }.filter { n -> n != LABEL_STATUS_BACKPORTED}.filter { l -> !backportLabelMatcher.matches(l) } + arrayListOf(LABEL_TYPE_BACKPORT), assignees) }
                 .flatMap { createIssue -> github.createIssue(createIssue) }
     }
+
+    override fun findBackportBranches(repositoryRef: RepositoryRef): Flux<BranchRef> {
+        return this.github.findLabels(repositoryRef)
+                .map { label -> label.name }
+                .concatMap { labelName -> findBranchNameByLabelName(labelName) }
+                .map { branchName -> BranchRef(repositoryRef, branchName) }
+    }
 }

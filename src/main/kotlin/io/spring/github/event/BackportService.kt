@@ -18,6 +18,8 @@ package io.spring.github.event
 
 import io.spring.github.api.BranchRef
 import io.spring.github.api.IssueRef
+import io.spring.github.api.RepositoryRef
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -61,4 +63,9 @@ interface BackportService {
      * can be extracted.
      */
     fun findBranchNameByLabelName(labelName: String) : Mono<String>
+
+    /**
+     * Finds the branches that can be backported to
+     */
+    fun findBackportBranches(repositoryRef: RepositoryRef): Flux<BranchRef>
 }

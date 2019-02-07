@@ -50,13 +50,10 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
     private fun backport(branch: BranchRef, issueNumber : Int) : Mono<Boolean> {
         val issue = IssueRef(branch.repository, issueNumber)
         return backport.findMilestoneNumber(branch)
-            .filterWhen { milestoneNumber -> isNotIssueForMilestone(issue, milestoneNumber) }
+            .filterWhen { milestoneNumber -> backport.isIssueForMilestone(issue, milestoneNumber).map { isIssue -> !isIssue } }
             .flatMap { milestoneNumber -> backport.createBackport(issue, milestoneNumber, listOf()).then(Mono.just(true)) }
             .defaultIfEmpty(false)
     }
-
-    private fun isNotIssueForMilestone(issue: IssueRef, milestoneNumber: Int) =
-            backport.isIssueForMilestone(issue, milestoneNumber).map { isIssue -> !isIssue }
 
     override fun backport(pushEvent : PushEvent) : Mono<Boolean> {
         val githubRef = pushEvent.getBranchRef()
@@ -72,19 +69,10 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
 
     private fun backport(fixedCommits: List<PushEvent.Commit>, githubRef: BranchRef, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {
         return Flux.fromIterable(fixedCommits)
-                .filterWhen { fixedCommit ->
-                    val issueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
-                    // FIXME: We should refine this
-                    //  We are looking up the backportedIssueForMilestone twice perhaps
-                    //  need to move combined logic into private method here and only have
-                    //  way to determine this specific issue (not any linked issues) have
-                    //  this milestone
-                    isNotIssueForMilestone(issueRef, milestoneNumber)
-                }
                 .flatMap { fixedCommit ->
                     backport(githubRef, fixedCommit, milestoneNumber, pushEvent)
                 }
-                .any { r -> r }
+                .then(Mono.just(true))
     }
 
     private fun backport(githubRef: BranchRef, fixedCommit: PushEvent.Commit, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {

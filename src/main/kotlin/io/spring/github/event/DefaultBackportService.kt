@@ -87,6 +87,13 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
 
     @Override
     override fun findBackportedIssueForMilestoneNumber(issueRef: IssueRef, milestoneNumber: Int): Mono<IssueRef> {
+        return github.findIssue(issueRef)
+                .filter { issue -> issue.milestone?.number == milestoneNumber }
+                .map { _ -> issueRef }
+                .switchIfEmpty(findBackportedIssueForMilestoneNumberFromTimeline(issueRef, milestoneNumber))
+    }
+
+    private fun findBackportedIssueForMilestoneNumberFromTimeline(issueRef: IssueRef, milestoneNumber: Int): Mono<IssueRef> {
         return github.findIssueTimeline(issueRef)
                 .filter { e -> e.event == "cross-referenced" }
                 .filter { e -> e.source?.issue?.milestone?.number == milestoneNumber }

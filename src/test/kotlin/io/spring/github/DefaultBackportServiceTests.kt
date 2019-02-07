@@ -229,13 +229,23 @@ class DefaultBackportServiceTests {
 
     @Test
     fun findBackportedIssueForMilestoneNumberWhenSameMilestoneThenFound() {
+        whenever(this.github.findIssue(any())).thenReturn(Mono.just(Issue(issue.number, issue.title, Issue.Milestone(milestoneNumber - 1), issue.labels)))
         whenever(this.github.findIssueTimeline(any())).thenReturn(Flux.just(backportTimelineEvent))
 
         assertThat(this.backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber).block()).isEqualTo(IssueRef(repositoryRef, backportTimelineEvent.source?.issue?.number!!))
     }
 
     @Test
+    fun findBackportedIssueForMilestoneNumberWhenIssueSameMilestoneThenFound() {
+        whenever(this.github.findIssue(any())).thenReturn(Mono.just(Issue(issue.number, issue.title, Issue.Milestone(milestoneNumber - 1), issue.labels)))
+        whenever(this.github.findIssueTimeline(any())).thenReturn(Flux.just(backportTimelineEvent))
+
+        assertThat(this.backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber - 1).block()).isEqualTo(issueRef)
+    }
+
+    @Test
     fun findBackportedIssueForMilestoneNumberWhenDiffMilestoneThenNull() {
+        whenever(this.github.findIssue(any())).thenReturn(Mono.just(Issue(issue.number, issue.title, Issue.Milestone(milestoneNumber - 1), issue.labels)))
         whenever(this.github.findIssueTimeline(any())).thenReturn(Flux.just(backportTimelineEvent))
 
         assertThat(this.backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber + 1).block()).isNull()

@@ -689,7 +689,7 @@ class WebClientGitHubApiTest {
         """)
 
         StepVerifier.create(this.github.createIssue(CreateIssue(repository, "Title", "Body", 1, listOf("label"), listOf("rwinch"))))
-                .expectNext(1347)
+                .expectNext(IssueRef(repository, 1347))
                 .verifyComplete()
 
         val createIssueRequest = server.takeRequest()

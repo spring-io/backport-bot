@@ -231,7 +231,7 @@ class DefaultBackportServiceTests {
     fun findBackportedIssueForMilestoneNumberWhenSameMilestoneThenFound() {
         whenever(this.github.findIssueTimeline(any())).thenReturn(Flux.just(backportTimelineEvent))
 
-        assertThat(this.backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber).block()).isEqualTo(backportTimelineEvent.source?.issue?.number)
+        assertThat(this.backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber).block()).isEqualTo(IssueRef(repositoryRef, backportTimelineEvent.source?.issue?.number!!))
     }
 
     @Test
@@ -253,12 +253,12 @@ class DefaultBackportServiceTests {
     fun createBackportWhenFindIssueThenSuccess() {
         whenever(github.findIssue(any())).thenReturn(Mono.just(issue))
         whenever(github.updateLabels(any(), any())).thenReturn(Mono.empty())
-        whenever(github.createIssue(any())).thenReturn(Mono.just(issue.number + 1))
+        whenever(github.createIssue(any())).thenReturn(Mono.just(IssueRef(repositoryRef, issue.number + 1)))
         whenever(github.comment(any(), any())).thenReturn(Mono.empty())
         whenever(github.closeIssue(any())).thenReturn(Mono.empty())
 
         StepVerifier.create(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
-                .expectNext(2)
+                .expectNext(IssueRef(repositoryRef,2))
                 .verifyComplete()
 
         val labelArgs = argumentCaptor<List<String>>()
@@ -282,12 +282,12 @@ class DefaultBackportServiceTests {
     fun createBackportWhenNoAssigneeThenSuccess() {
         whenever(github.findIssue(any())).thenReturn(Mono.just(issue))
         whenever(github.updateLabels(any(), any())).thenReturn(Mono.empty())
-        whenever(github.createIssue(any())).thenReturn(Mono.just(issue.number + 1))
+        whenever(github.createIssue(any())).thenReturn(Mono.just(IssueRef(repositoryRef,issue.number + 1)))
         whenever(github.comment(any(), any())).thenReturn(Mono.empty())
         whenever(github.closeIssue(any())).thenReturn(Mono.empty())
 
         StepVerifier.create(backport.createBackport(issueRef, milestoneNumber, listOf()))
-                .expectNext(2)
+                .expectNext(IssueRef(repositoryRef,2))
                 .verifyComplete()
 
         val labelArgs = argumentCaptor<List<String>>()
@@ -313,12 +313,12 @@ class DefaultBackportServiceTests {
         val issue = Issue(issue.number, issue.title, issue.milestone, issue.labels + Issue.Label("status: backported"))
         whenever(github.findIssue(any())).thenReturn(Mono.just(issue))
         whenever(github.updateLabels(any(), any())).thenReturn(Mono.empty())
-        whenever(github.createIssue(any())).thenReturn(Mono.just(issue.number + 1))
+        whenever(github.createIssue(any())).thenReturn(Mono.just(IssueRef(repositoryRef,issue.number + 1)))
         whenever(github.comment(any(), any())).thenReturn(Mono.empty())
         whenever(github.closeIssue(any())).thenReturn(Mono.empty())
 
         StepVerifier.create(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
-                .expectNext(2)
+                .expectNext(IssueRef(repositoryRef,2))
                 .verifyComplete()
 
         val labelArgs = argumentCaptor<List<String>>()

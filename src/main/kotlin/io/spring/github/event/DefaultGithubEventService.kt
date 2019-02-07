@@ -67,8 +67,8 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
                         val issueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
                 backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber)
                             .switchIfEmpty(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
-                            .flatMap { issueNumber ->
-                                backport.closeBackport(IssueRef(githubRef.repository, issueNumber), fixedCommit.id).then(Mono.just(true))
+                            .flatMap { issueRef ->
+                                backport.closeBackport(issueRef, fixedCommit.id).then(Mono.just(true))
                             }
                     }
                     .then(Mono.just(true))

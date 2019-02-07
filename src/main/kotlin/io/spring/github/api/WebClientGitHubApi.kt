@@ -226,7 +226,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .map { f -> ByteArrayInputStream(f) }
     }
 
-    override fun createIssue(issue: CreateIssue): Mono<Int> {
+    override fun createIssue(issue: CreateIssue): Mono<IssueRef> {
         val uri = UriComponentsBuilder.fromUriString(baseGitHubUrl)
                 .path("/repos/${issue.ref.fullName}/issues")
                 .build()
@@ -242,6 +242,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                     else
                         error(clientResponse, "Cannot not create issue for $issue Got status $status")
                 }
+                .map { issueNumber -> IssueRef(issue.ref, issueNumber) }
     }
 
     override fun findIssue(issueRef : IssueRef) : Mono<Issue> {

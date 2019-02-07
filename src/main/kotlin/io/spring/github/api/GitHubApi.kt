@@ -37,7 +37,7 @@ interface GitHubApi {
      * Create a GitHub issue
      * @return the issue number
      */
-    fun createIssue(issue: CreateIssue): Mono<Int>
+    fun createIssue(issue: CreateIssue): Mono<IssueRef>
 
     /**
      * Closes an issue

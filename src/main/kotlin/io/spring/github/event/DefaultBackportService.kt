@@ -86,13 +86,14 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
     }
 
     @Override
-    override fun findBackportedIssueForMilestoneNumber(issueRef: IssueRef, milestoneNumber: Int): Mono<Int> {
+    override fun findBackportedIssueForMilestoneNumber(issueRef: IssueRef, milestoneNumber: Int): Mono<IssueRef> {
         return github.findIssueTimeline(issueRef)
                 .filter { e -> e.event == "cross-referenced" }
                 .filter { e -> e.source?.issue?.milestone?.number == milestoneNumber }
                 .filter { e -> e.source?.issue?.body == "Backport of gh-${issueRef.number}" }
                 .map { e -> e.source?.issue?.number!! }
                 .next()
+                .map { issueNumber -> IssueRef(issueRef.repository, issueNumber) }
     }
 
     @Override
@@ -102,7 +103,7 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
     }
 
     @Override
-    override fun createBackport(fixedIssue: IssueRef, milestone: Int, assignees: List<String>): Mono<Int> {
+    override fun createBackport(fixedIssue: IssueRef, milestone: Int, assignees: List<String>): Mono<IssueRef> {
         return github.findIssue(fixedIssue)
                 .switchIfEmpty(Mono.error { IllegalStateException("Cannot find issue $fixedIssue") })
                 .flatMap { issue -> github.updateLabels(fixedIssue, issue.labels.map {l -> l.name } + arrayListOf(LABEL_STATUS_BACKPORTED)).thenReturn(issue) }

@@ -103,7 +103,7 @@ class DefaultGithubEventServiceTests {
         whenever(backports.removeLabel(any(), any())).thenReturn(Mono.empty())
         whenever(backports.findMilestoneNumber(any())).thenReturn(Mono.just(1))
         whenever(backports.isIssueForMilestone(any(), any())).thenReturn(Mono.just(false))
-        whenever(backports.createBackport(any(), any(), any())).thenReturn(Mono.just(100))
+        whenever(backports.createBackport(any(), any(), any())).thenReturn(Mono.just(IssueRef(RepositoryRef("rwinch/test"),100)))
 
         val issue = Issue(1, "Title", null, listOf())
         val issueEvent = IssueEvent("labeled", IssueEvent.Repository("rwinch/test"), IssueEvent.Sender("rwinch"), IssueEvent.Label("Label"), issue)
@@ -121,7 +121,7 @@ class DefaultGithubEventServiceTests {
         whenever(backports.findBackportBranches(any())).thenReturn(Flux.just(BranchRef(repositoryRef, "1.0.x"), BranchRef(repositoryRef, "2.0.x")))
         whenever(backports.findMilestoneNumber(any())).thenReturn(Mono.just(1))
         whenever(backports.findBackportedIssueForMilestoneNumber(any(), any())).thenReturn(Mono.empty())
-        whenever(backports.createBackport(any(), any(), any())).thenReturn(Mono.just(2))
+        whenever(backports.createBackport(any(), any(), any())).thenReturn(Mono.just(IssueRef(repositoryRef, 2)))
         whenever(backports.closeBackport(any(), any())).thenReturn(Mono.empty())
         val pushEvent = PushEvent("2.0.x", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("123", "Fixes: gh-123")))
 

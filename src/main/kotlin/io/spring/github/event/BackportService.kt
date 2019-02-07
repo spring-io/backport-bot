@@ -40,7 +40,7 @@ interface BackportService {
     /**
      * Creates a backport issue
      */
-    fun createBackport(fixedIssue: IssueRef, milestone: Int, assignees: List<String>): Mono<Int>
+    fun createBackport(fixedIssue: IssueRef, milestone: Int, assignees: List<String>): Mono<IssueRef>
 
     /**
      If found, removes a label from an issue
@@ -56,7 +56,7 @@ interface BackportService {
      * Finds a backported issue number for a specific milestone number. The issue is the
      * original issue.
      */
-    fun findBackportedIssueForMilestoneNumber(issueRef: IssueRef, milestoneNumber: Int): Mono<Int>
+    fun findBackportedIssueForMilestoneNumber(issueRef: IssueRef, milestoneNumber: Int): Mono<IssueRef>
 
     /**
      * Given a labelName will extract out a branch name or an empty Mono if no branch name

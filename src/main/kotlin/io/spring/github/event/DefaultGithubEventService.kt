@@ -62,18 +62,26 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
             .filter { shouldBackport -> shouldBackport }
             .flatMap { _ -> backport.findMilestoneNumber(githubRef) }
             .flatMap { milestoneNumber ->
-                Flux.fromIterable(fixedCommits)
-                    .flatMap { fixedCommit ->
-                        val issueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
-                backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber)
-                            .switchIfEmpty(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
-                            .flatMap { issueRef ->
-                                backport.closeBackport(issueRef, fixedCommit.id).then(Mono.just(true))
-                            }
-                    }
-                    .then(Mono.just(true))
+                backport(fixedCommits, githubRef, milestoneNumber, pushEvent)
             }
             .defaultIfEmpty(false)
+    }
+
+    private fun backport(fixedCommits: List<PushEvent.Commit>, githubRef: BranchRef, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {
+        return Flux.fromIterable(fixedCommits)
+                .flatMap { fixedCommit ->
+                    backport(githubRef, fixedCommit, milestoneNumber, pushEvent)
+                }
+                .then(Mono.just(true))
+    }
+
+    private fun backport(githubRef: BranchRef, fixedCommit: PushEvent.Commit, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {
+        val issueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
+        return backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber)
+                .switchIfEmpty(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
+                .flatMap { issueRef ->
+                    backport.closeBackport(issueRef, fixedCommit.id).then(Mono.just(true))
+                }
     }
 
     /**

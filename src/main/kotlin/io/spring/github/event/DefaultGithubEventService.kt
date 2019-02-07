@@ -88,9 +88,9 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
     }
 
     private fun backport(githubRef: BranchRef, fixedCommit: PushEvent.Commit, milestoneNumber: Int, pushEvent: PushEvent): Mono<Boolean> {
-        val issueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
-        return backport.findBackportedIssueForMilestoneNumber(issueRef, milestoneNumber)
-                .switchIfEmpty(backport.createBackport(issueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
+        val fixedIssueRef = IssueRef(githubRef.repository, fixedCommit.getFixIssueId()!!)
+        return backport.findBackportedIssueForMilestoneNumber(fixedIssueRef, milestoneNumber)
+                .switchIfEmpty(backport.createBackport(fixedIssueRef, milestoneNumber, listOf(pushEvent.pusher.name)))
                 .flatMap { issueRef ->
                     backport.closeBackport(issueRef, fixedCommit.id).then(Mono.just(true))
                 }
@@ -110,7 +110,7 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
         return this.backport.findBackportBranches(branchRef.repository)
             .filter { branch -> branch == branchRef }
             .next()
-            .map { branchRef -> true }
+            .map { _ -> true }
             .defaultIfEmpty(false)
     }
 }

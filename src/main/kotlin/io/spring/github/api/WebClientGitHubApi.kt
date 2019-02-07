@@ -133,7 +133,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .path("/repos/${issueRef.repository.fullName}/issues/{number}")
                 .buildAndExpand(issueRef.number)
                 .toUri()
-        return return webClient.patch()
+        return webClient.patch()
                 .uri(uri)
                 .syncBody(body)
                 .exchange()

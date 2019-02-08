@@ -37,7 +37,7 @@ class PushEvent(val ref : String, val repository : Repository, val pusher : Push
         val r = """.*?(Fixes|Closes):?\s+(gh\-|#)(?<id>\d+)(\r?\n)*""".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 
         fun getFixIssueId() : Int? {
-            return r.matchEntire(message)?.groups?.get("id")?.value?.toInt()
+            return r.find(message)?.groups?.get("id")?.value?.toInt()
         }
     }
 

@@ -90,6 +90,22 @@ class PushEventTest {
         assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
     }
 
+    @Test
+    fun getFixedIssueIdsWhenExtraSpacesThenFindValues() {
+        val e = pushEvent("Subject\n\n  Closes gh-123  \r\n")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+    }
+
+    @Test
+    fun getFixedIssueIdsWhenNotLastLineThenFindValues() {
+        val e = pushEvent("Fix Javadoc typos\n" +
+                "\n" +
+                "Closes gh-22261\n" +
+                "\n" +
+                "(cherry picked from commit 9837ec5)")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(22261)
+    }
+
     fun pushEvent(commitMessage : String) : PushEvent {
         val commits = listOf(PushEvent.Commit("sha", commitMessage))
         return PushEvent("master", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), commits)

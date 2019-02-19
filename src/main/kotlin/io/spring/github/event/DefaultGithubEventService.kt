@@ -55,6 +55,27 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
             .defaultIfEmpty(false)
     }
 
+    override fun backport(pullRequestEvent: PullRequestEvent): Mono<Boolean> {
+        return findBranchFromLabeledPullRequestEvent(pullRequestEvent)
+                .flatMap { branch ->
+                    backport.removeLabel(pullRequestEvent.getIssueRef(), pullRequestEvent.label?.name!!)
+                            .then(backport(branch, pullRequestEvent.pullRequest.number))
+                }
+                .defaultIfEmpty(false)
+    }
+
+    /**
+     * Get the branch from the label of a labeled IssueEvent
+     */
+    private fun findBranchFromLabeledPullRequestEvent(pullRequestEvent: PullRequestEvent): Mono<BranchRef> {
+        if (pullRequestEvent.action != "labeled") {
+            return Mono.empty()
+        }
+        val labelName = pullRequestEvent.label!!.name
+        return backport.findBranchNameByLabelName(labelName)
+                .map { branchName -> BranchRef(pullRequestEvent.getRepositoryRef(), branchName) }
+    }
+
     override fun backport(pushEvent : PushEvent) : Mono<Boolean> {
         val branchRef = pushEvent.getBranchRef()
         return isBackport(pushEvent)

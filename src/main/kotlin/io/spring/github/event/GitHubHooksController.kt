@@ -63,4 +63,19 @@ class GitHubHooksController(val events : GithubEventService) {
                 .defaultIfEmpty(ResponseEntity.ok("OK"))
                 .block()!!
     }
+
+    /**
+     * @param body
+     * @param githubEvent
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = arrayOf("/"), headers = arrayOf("X-GitHub-Event=pull_request"))
+    fun githubPullRequestEvent(@RequestBody pullRequestEvent: PullRequestEvent): ResponseEntity<String> {
+        return this.events.backport(pullRequestEvent)
+                .filter { backported -> backported }
+                .map { ResponseEntity("Created", HttpStatus.CREATED) }
+                .defaultIfEmpty(ResponseEntity.ok("OK"))
+                .block()!!
+    }
 }

@@ -21,6 +21,7 @@ import io.spring.github.api.*
 import io.spring.github.event.BackportService
 import io.spring.github.event.DefaultGithubEventService
 import io.spring.github.event.IssueEvent
+import io.spring.github.event.PullRequestEvent
 import io.spring.github.event.PushEvent
 import org.assertj.core.api.Assertions.*
 import org.junit.Test
@@ -114,6 +115,91 @@ class DefaultGithubEventServiceTests {
 
         verify(backports).createBackport(any(), any(), eq(emptyList()))
     }
+
+    // pull request
+
+
+    @Test
+    fun backportPullRequestWhenFindBranchNameByLabelNameEmptyThenFalse() {
+        whenever(backports.findBranchNameByLabelName(any())).thenReturn(Mono.empty())
+
+        val issue = PullRequest(1, "Title", null, listOf())
+        val issueEvent = PullRequestEvent("labeled", PullRequestEvent.Repository("rwinch/test"), PullRequestEvent.Label("Label"), issue)
+
+        StepVerifier.create(events.backport(issueEvent))
+                .expectNext(false)
+                .verifyComplete()
+    }
+
+    @Test
+    fun backportPullRequestWhenActionOtherThenNoLabelRemovedAndFalse() {
+        whenever(backports.findBranchNameByLabelName(any())).thenReturn(Mono.just("1.0.x"))
+
+        val issue = PullRequest(1, "Title", null, listOf())
+        val issueEvent = PullRequestEvent("other", PullRequestEvent.Repository("rwinch/test"), PullRequestEvent.Label("Label"), issue)
+
+        StepVerifier.create(events.backport(issueEvent))
+                .expectNext(false)
+                .verifyComplete()
+    }
+
+    @Test
+    fun backportPullRequestWhenIssueForMilestoneThenLabelRemovedAndFalse() {
+        whenever(backports.findBranchNameByLabelName(any())).thenReturn(Mono.just("1.0.x"))
+        whenever(backports.removeLabel(any(), any())).thenReturn(Mono.empty())
+        whenever(backports.findMilestoneNumber(any())).thenReturn(Mono.just(1))
+        whenever(backports.isIssueForMilestone(any(), any())).thenReturn(Mono.just(true))
+
+        val issue = PullRequest(1, "Title", null, listOf())
+        val issueEvent = PullRequestEvent("labeled", PullRequestEvent.Repository("rwinch/test"), PullRequestEvent.Label("Label"), issue)
+
+        StepVerifier.create(events.backport(issueEvent))
+                .expectNext(false)
+                .verifyComplete()
+
+        val issueCaptor = argumentCaptor<IssueRef>()
+        val labelCaptor = argumentCaptor<String>()
+
+        verify(backports).removeLabel(issueCaptor.capture(), labelCaptor.capture())
+
+        assertThat(labelCaptor.firstValue).isEqualTo(issueEvent.label?.name)
+        assertThat(issueCaptor.firstValue).isEqualTo(IssueRef(RepositoryRef(issueEvent.repository.fullName), issue.number))
+    }
+
+    @Test
+    fun backportPullRequestWhenIssueForMilestoneThenTrue() {
+        whenever(backports.findBranchNameByLabelName(any())).thenReturn(Mono.just("1.0.x"))
+        whenever(backports.removeLabel(any(), any())).thenReturn(Mono.empty())
+        whenever(backports.findMilestoneNumber(any())).thenReturn(Mono.just(1))
+        whenever(backports.isIssueForMilestone(any(), any())).thenReturn(Mono.just(true))
+
+        val issue = PullRequest(1, "Title", null, listOf())
+        val issueEvent = PullRequestEvent("labeled", PullRequestEvent.Repository("rwinch/test"), PullRequestEvent.Label("Label"), issue)
+
+        StepVerifier.create(events.backport(issueEvent))
+                .expectNext(false)
+                .verifyComplete()
+    }
+
+    @Test
+    fun backportPullRequestWhenNotIssueForMilestoneThenTrue() {
+        whenever(backports.findBranchNameByLabelName(any())).thenReturn(Mono.just("1.0.x"))
+        whenever(backports.removeLabel(any(), any())).thenReturn(Mono.empty())
+        whenever(backports.findMilestoneNumber(any())).thenReturn(Mono.just(1))
+        whenever(backports.isIssueForMilestone(any(), any())).thenReturn(Mono.just(false))
+        whenever(backports.createBackport(any(), any(), any())).thenReturn(Mono.just(IssueRef(RepositoryRef("rwinch/test"),100)))
+
+        val issue = PullRequest(1, "Title", null, listOf())
+        val issueEvent = PullRequestEvent("labeled", PullRequestEvent.Repository("rwinch/test"), PullRequestEvent.Label("Label"), issue)
+
+        StepVerifier.create(events.backport(issueEvent))
+                .expectNext(true)
+                .verifyComplete()
+
+        verify(backports).createBackport(any(), any(), eq(emptyList()))
+    }
+
+    // push
 
     @Test
     fun backportPushWhenMatchesBranchThenTrue() {

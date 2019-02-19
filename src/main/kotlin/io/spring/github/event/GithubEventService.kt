@@ -30,6 +30,12 @@ interface GithubEventService {
     fun backport(pushEvent : PushEvent) : Mono<Boolean>
 
     /**
+     * Handle a PushEvent. Closes a backported issue when Fixes: gh-<original-ticket-id>
+     * was pushed to the corresponding branch.
+     */
+    fun backport(pullRequestEvent: PullRequestEvent): Mono<Boolean>
+
+    /**
      * Looks for adding a label of "backport: 1.2.x" and then creates a Backport issue
      * if not already created. It then removes the label.
      */

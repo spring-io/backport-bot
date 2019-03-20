@@ -3326,7 +3326,7 @@ class GithubHooksControllerTest {
             "ssh_url": "git@github.com:spring-projects/spring-security.git",
             "clone_url": "https://github.com/spring-projects/spring-security.git",
             "svn_url": "https://github.com/spring-projects/spring-security",
-            "homepage": "http://spring.io/spring-security",
+            "homepage": "https://spring.io/spring-security",
             "size": 33219,
             "stargazers_count": 2994,
             "watchers_count": 2994,

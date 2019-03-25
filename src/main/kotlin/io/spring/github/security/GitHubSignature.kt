@@ -36,7 +36,7 @@ class GitHubSignature(val key : String) {
 
         val providedHmacBytes = Hex.decode(providedHmac)
 
-        val expectedBytes = sign(body!!, key)
+        val expectedBytes = sign(body, key)
 
         return MessageDigest.isEqual(providedHmacBytes, expectedBytes)
     }

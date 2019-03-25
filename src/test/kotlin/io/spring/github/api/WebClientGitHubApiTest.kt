@@ -1703,6 +1703,49 @@ class WebClientGitHubApiTest {
     }
 
     @Test
+    fun findIssueTimelineWhenPaginationWhenNoNext() {
+        val baseUrl = this.server.url("")
+        val next = "${baseUrl}repositories/1148753/issues/22603/timeline?page=1"
+        val nextHeader = "<${next}>; rel=\"prev\", <${baseUrl}repositories/1148753/issues/22603/timeline?page=1>; rel=\"first\"; rel=\"last\""
+        this.server.enqueue(response("""[
+    {
+        "actor": {
+            "avatar_url": "https://avatars0.githubusercontent.com/u/362503?v=4",
+            "events_url": "https://api.github.com/users/rwinch/events{/privacy}",
+            "followers_url": "https://api.github.com/users/rwinch/followers",
+            "following_url": "https://api.github.com/users/rwinch/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rwinch/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/rwinch",
+            "id": 362503,
+            "login": "rwinch",
+            "node_id": "MDQ6VXNlcjM2MjUwMw==",
+            "organizations_url": "https://api.github.com/users/rwinch/orgs",
+            "received_events_url": "https://api.github.com/users/rwinch/received_events",
+            "repos_url": "https://api.github.com/users/rwinch/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/rwinch/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rwinch/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/rwinch"
+        },
+        "commit_id": "357f2a77c9bcf7e0920e0107e35380f9dc50dd9e",
+        "commit_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/commits/357f2a77c9bcf7e0920e0107e35380f9dc50dd9e",
+        "created_at": "2018-12-13T21:03:38Z",
+        "event": "referenced",
+        "id": 2025328930,
+        "node_id": "MDE1OlJlZmVyZW5jZWRFdmVudDIwMjUzMjg5MzA=",
+        "url": "https://api.github.com/repos/rwinch/deleteme-backport-test/issues/events/2025328930"
+    }
+]
+        """.trimIndent()).setHeader("Link", nextHeader))
+
+        val timeline = github.findIssueTimeline(issue).collectList().block()!!
+
+        assertThat(timeline).hasSize(1)
+        assertThat(this.server.takeRequest().requestUrl.url()).hasPath("/repos/rwinch/repository/issues/1347/timeline")
+    }
+    @Test
     fun findLabelsWhenSinglePageThenWorks() {
         enqueue("""[
           {

@@ -339,7 +339,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
         if (!linkHeaderValue.matches(nextRegex)) {
             return null
         }
-        return linkHeaderValue?.replace(nextRegex, "$1")
+        return linkHeaderValue.replace(nextRegex, "$1")
     }
 
     data class GitHubMilestone(val number : Int, val title : String)

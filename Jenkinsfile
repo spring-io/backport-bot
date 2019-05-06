@@ -9,27 +9,13 @@ def SUCCESS = hudson.model.Result.SUCCESS.toString()
 currentBuild.result = SUCCESS
 
 try {
-	parallel check: {
-		stage('Check') {
+	build: {
+		stage('Build') {
 			node {
 				checkout scm
 				try {
 					sh "./gradlew clean assemble check --no-daemon --stacktrace"
-				} catch(Exception e) {
-					currentBuild.result = 'FAILED: check'
-					throw e
-				} finally {
-					junit '**/build/test-results/*/*.xml'
-				}
-			}
-		}
-	}
 
-	if(currentBuild.result == 'SUCCESS') {
-		parallel deploy: {
-			stage('Deploy Application') {
-				node {
-					checkout scm
 					sh "./ci/scripts/install-cf.sh"
 					withCredentials([usernamePassword(credentialsId: 'backportbot-cf', passwordVariable: 'CF_PASSWORD', usernameVariable: 'CF_USERNAME')]) {
 						sh "./cf login -a api.run.pivotal.io -o FrameworksAndRuntimes -s rwinch -u '$CF_USERNAME' -p '$CF_PASSWORD'"
@@ -41,6 +27,11 @@ try {
 							}
 						}
 					}
+				} catch(Exception e) {
+					currentBuild.result = 'FAILED: check'
+					throw e
+				} finally {
+					junit '**/build/test-results/*/*.xml'
 				}
 			}
 		}

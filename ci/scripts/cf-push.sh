@@ -15,7 +15,7 @@ VENERABLE_APP_NAME="$APP_NAME-venerable"
 cf delete $VENERABLE_APP_NAME -f
 cf rename $APP_NAME $VENERABLE_APP_NAME
 
-if cf push $APP_NAME -p build/libs/backport-bot-0.0.1-SNAPSHOT.jar $PUSH_ARGS ; then
+if cf push $APP_NAME -p build/libs/*.jar $PUSH_ARGS ; then
   # the app started successfully so remove venerable app
   cf delete $VENERABLE_APP_NAME -f
 else

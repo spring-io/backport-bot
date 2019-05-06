@@ -193,6 +193,77 @@ class WebClientGitHubApiTest {
         }
     }
 
+
+    @Test
+    fun saveHookWhenNoConfigUrlPropertyThenCreates() {
+        enqueue("""[
+          {
+            "active": false,
+            "config": {
+              "domain": "notify.travis-ci.org",
+              "token": "********",
+              "user": "theuser"
+            },
+            "created_at": "2016-03-14T19:05:51Z",
+            "events": [
+              "create",
+              "delete",
+              "issue_comment",
+              "member",
+              "public",
+              "pull_request",
+              "push",
+              "repository"
+            ],
+            "id": 12345,
+            "last_response": {
+              "code": null,
+              "message": null,
+              "status": "unused"
+            },
+            "name": "travis",
+            "ping_url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345/pings",
+            "test_url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345/test",
+            "type": "Repository",
+            "updated_at": "2019-01-16T15:21:38Z",
+            "url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345"
+          }
+
+        ]""")
+        val response = response("""{
+          "id": 1,
+          "url": "https://api.github.com/repos/octocat/Hello-World/hooks/1",
+          "test_url": "https://api.github.com/repos/octocat/Hello-World/hooks/1/test",
+          "ping_url": "https://api.github.com/repos/octocat/Hello-World/hooks/1/pings",
+          "name": "web",
+          "events": [
+            "push",
+            "pull_request"
+          ],
+          "active": true,
+          "config": {
+            "url": "http://example.com/webhook",
+            "content_type": "json"
+          },
+          "updated_at": "2011-09-06T20:39:23Z",
+          "created_at": "2011-09-06T17:26:27Z"
+        }""")
+                .setResponseCode(HttpStatus.CREATED.value())
+        this.server.enqueue(response)
+
+        this.github.saveHook(SaveHook(repository, SaveHook.Config("https://example.com/", "secret"), listOf("push"))).block()
+
+        this.server.takeRequest()!!.apply {
+            assertThat(method).isEqualTo(HttpMethod.GET.name)
+            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+        }
+        this.server.takeRequest()!!.apply {
+            assertThat(method).isEqualTo(HttpMethod.POST.name)
+            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            JSONAssert.assertEquals("""{"config":{"url":"https://example.com/","secret":"secret","content_type":"json"},"events":["push"],"name":"web"}""", body.readUtf8(), true)
+        }
+    }
+
     @Test
     fun saveHookWhenHookstMatchThenEdits() {
         enqueue("""[

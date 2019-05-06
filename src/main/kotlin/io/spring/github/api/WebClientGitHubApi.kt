@@ -117,7 +117,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
     }
 
     data class Hook(val id: Int, val config: Config) {
-        data class Config(val url : String)
+        data class Config(val url : String?)
     }
 
     override fun closeIssue(issueRef: IssueRef): Mono<Void> {

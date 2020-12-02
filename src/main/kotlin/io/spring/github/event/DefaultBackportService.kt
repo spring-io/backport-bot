@@ -60,7 +60,7 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
                     val p = Properties()
                     p.load(input)
                     val version = p.getProperty("version")
-                    version.replace(".BUILD-SNAPSHOT", "")
+                    version.replace(".BUILD-SNAPSHOT", "").replace("-SNAPSHOT", "")
                 }
                 .switchIfEmpty(Mono.error { IllegalStateException("Cannot find file gradle.properties for $ref") })
     }

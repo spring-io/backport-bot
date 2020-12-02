@@ -116,13 +116,23 @@ class DefaultBackportServiceTests {
     }
 
     @Test
-    fun findMilestoneNumberWhenMilestoneNumberFound() {
+    fun findMilestoneNumberWhenMilestoneNumberBuildSnapshotFound() {
         whenever(github.findFile(branchRef, "gradle.properties")).thenReturn(Mono.just("version=1.1.0.BUILD-SNAPSHOT".byteInputStream(Charset.defaultCharset())))
         whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0")).thenReturn(Mono.just(1))
 
         StepVerifier.create(backport.findMilestoneNumber(branchRef))
-            .expectNext(1)
-            .verifyComplete()
+                .expectNext(1)
+                .verifyComplete()
+    }
+
+    @Test
+    fun findMilestoneNumberWhenMilestoneNumberSnapshotFound() {
+        whenever(github.findFile(branchRef, "gradle.properties")).thenReturn(Mono.just("version=1.1.0-SNAPSHOT".byteInputStream(Charset.defaultCharset())))
+        whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0")).thenReturn(Mono.just(1))
+
+        StepVerifier.create(backport.findMilestoneNumber(branchRef))
+                .expectNext(1)
+                .verifyComplete()
     }
 
     @Test

@@ -36,9 +36,9 @@ The first step is to https://github.com/settings/developers[create an OAuth App]
 Example values are:
 
 * Application name: `BackportBot`
-* Homepage URL: `https://backportbot.cfapps.io`
+* Homepage URL: `https://backportbot.apps.pcfone.io/`
 * Application description: `Manages backports`
-* Authorization callback URL: `https://backportbot.cfapps.io/login/oauth2/code/github`
+* Authorization callback URL: `https://backportbot.apps.pcfone.io/login/oauth2/code/github`
 
 NOTE: The user that creates the OAuth application will need to be granted access to spring-io to read organizational data.
 The request can be made when the first user that is part of the spring team logs into the application by clicking the request button next to the spring-io organization.

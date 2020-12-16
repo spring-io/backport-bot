@@ -33,7 +33,7 @@ try {
 							sh "./cf login -a api.run.pcfone.io -o group-spring -s backport-bot -u '$CF_USERNAME' -p '$CF_PASSWORD'"
 						}
 						withCredentials([string(credentialsId: 'backportbot-issuemaster-personal-access-token', variable: 'ISSUEMASTER_PERSONAL_ACCESS_TOKEN')]) {
-							withCredentials([usernamePassword(credentialsId: 'backportbot-client-registration', passwordVariable: 'CLIENT_SECRET', usernameVariable: 'CLIENT_ID')]) {
+							withCredentials([usernamePassword(credentialsId: 'backportbot-pcfone-client-registration', passwordVariable: 'CLIENT_SECRET', usernameVariable: 'CLIENT_ID')]) {
 								withCredentials([string(credentialsId: 'backportbot-github-webhook-secret', variable: 'GITHUB_WEBHOOK_SECRET')]) {
 									sh "./ci/scripts/cf-push.sh backportbot \"--var CLIENT_ID=$CLIENT_ID --var CLIENT_SECRET=$CLIENT_SECRET --var GITHUB_WEBHOOK_SECRET=$GITHUB_WEBHOOK_SECRET --var ISSUEMASTER_PERSONAL_ACCESS_TOKEN=$ISSUEMASTER_PERSONAL_ACCESS_TOKEN --var INFO_VERSION=build-${env.BUILD_NUMBER}\""
 								}

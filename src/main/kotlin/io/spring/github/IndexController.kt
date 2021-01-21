@@ -54,7 +54,7 @@ class IndexController(val gitHubApi: GitHubApi, val webHookSecret: GitHubWebHook
         if (p != "admin" && p != "write") {
             throw IllegalStateException("The configured user to manage issues, ${permission.login}, requires admin or write permission to the $fullName repository but has $p")
         }
-        gitHubApi.saveHook(SaveHook(repository, config, listOf("issues", "push")))
+        gitHubApi.saveHook(SaveHook(repository, config, listOf("issues", "pull_request", "push")))
                 .block()
 
         return "redirect:/?success"

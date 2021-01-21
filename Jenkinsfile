@@ -17,6 +17,7 @@ try {
 					withEnv(["JAVA_HOME=${ tool 'jdk8' }"]) {
 						sh "./gradlew clean assemble check --no-daemon --stacktrace"
 
+						sh "./ci/scripts/install-cf.sh"
 						withCredentials([usernamePassword(credentialsId: 'pcfone-builds_at_springframework.org', passwordVariable: 'CF_PASSWORD', usernameVariable: 'CF_USERNAME')]) {
 							sh "./cf login -a api.run.pcfone.io -o group-spring -s backport-bot -u '$CF_USERNAME' -p '$CF_PASSWORD'"
 						}

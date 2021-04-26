@@ -235,7 +235,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -417,7 +417,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 2,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "Codertocat",
@@ -590,7 +590,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -762,7 +762,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -934,7 +934,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -1107,7 +1107,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -1279,7 +1279,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 2,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -1451,7 +1451,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -1681,7 +1681,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -1873,7 +1873,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -2055,7 +2055,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -2263,7 +2263,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -2435,7 +2435,7 @@ class GithubHooksControllerTest {
             "forks": 0,
             "open_issues": 3,
             "watchers": 0,
-            "default_branch": "master"
+            "default_branch": "main"
           },
           "sender": {
             "login": "rwinch",
@@ -2482,7 +2482,7 @@ class GithubHooksControllerTest {
             verify(events).backport(capture())
 
             val e = firstValue
-            assertThat(e.ref).isEqualTo("refs/heads/master")
+            assertThat(e.ref).isEqualTo("refs/heads/main")
             assertThat(e.repository.fullName).isEqualTo("spring-projects/spring-security")
             assertThat(e.pusher.name).isEqualTo("rwinch")
             assertThat(e.commits.map { c -> c.message }).containsExactly("Fixed Git SCM book link")
@@ -2686,7 +2686,7 @@ class GithubHooksControllerTest {
         "forks": 0,
         "open_issues": 3,
         "watchers": 0,
-        "default_branch": "master"
+        "default_branch": "main"
       },
       "sender": {
         "login": "rwinch",
@@ -2786,8 +2786,8 @@ class GithubHooksControllerTest {
     "comments_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/issues/156/comments",
     "statuses_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/statuses/080536b061193cbf3065a7c70a37c228ba995524",
     "head": {
-      "label": "rwinch:master",
-      "ref": "master",
+      "label": "rwinch:main",
+      "ref": "main",
       "sha": "080536b061193cbf3065a7c70a37c228ba995524",
       "user": {
         "login": "rwinch",
@@ -2900,7 +2900,7 @@ class GithubHooksControllerTest {
         "forks": 0,
         "open_issues": 1,
         "watchers": 0,
-        "default_branch": "master"
+        "default_branch": "main"
       }
     },
     "base": {
@@ -3018,7 +3018,7 @@ class GithubHooksControllerTest {
         "forks": 0,
         "open_issues": 1,
         "watchers": 0,
-        "default_branch": "master"
+        "default_branch": "main"
       }
     },
     "_links": {
@@ -3161,7 +3161,7 @@ class GithubHooksControllerTest {
     "forks": 0,
     "open_issues": 1,
     "watchers": 0,
-    "default_branch": "master"
+    "default_branch": "main"
   },
   "sender": {
     "login": "rwinch",
@@ -3187,7 +3187,7 @@ class GithubHooksControllerTest {
 
     val pushEventBody = """
         {
-          "ref": "refs/heads/master",
+          "ref": "refs/heads/main",
           "before": "2cb8794e355e94c0568f1085d51986e76ad2a204",
           "after": "60fc5381fe9f094e56bbb279b857eaec318f5c0f",
           "created": false,
@@ -3350,9 +3350,9 @@ class GithubHooksControllerTest {
             "forks": 2779,
             "open_issues": 894,
             "watchers": 2994,
-            "default_branch": "master",
+            "default_branch": "main",
             "stargazers": 2994,
-            "master_branch": "master",
+            "main_branch": "main",
             "organization": "spring-projects"
           },
           "pusher": {

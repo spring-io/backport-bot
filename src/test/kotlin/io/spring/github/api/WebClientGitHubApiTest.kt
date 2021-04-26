@@ -39,7 +39,7 @@ class WebClientGitHubApiTest {
 
     private val repository = RepositoryRef("rwinch/repository")
 
-    private val branch = BranchRef(repository, "refs/heads/master")
+    private val branch = BranchRef(repository, "refs/heads/main")
 
     private val issue = IssueRef(branch.repository, 1347)
 
@@ -1351,12 +1351,12 @@ class WebClientGitHubApiTest {
           "sha": "3d21ec53a331a6f037a91c368710b99387d012c1",
           "url": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
           "git_url": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1",
-          "html_url": "https://github.com/octokit/octokit.rb/blob/master/README.md",
-          "download_url": "https://raw.githubusercontent.com/octokit/octokit.rb/master/README.md",
+          "html_url": "https://github.com/octokit/octokit.rb/blob/main/README.md",
+          "download_url": "https://raw.githubusercontent.com/octokit/octokit.rb/main/README.md",
           "_links": {
             "git": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1",
             "self": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
-            "html": "https://github.com/octokit/octokit.rb/blob/master/README.md"
+            "html": "https://github.com/octokit/octokit.rb/blob/main/README.md"
           }
         }""")
 
@@ -1368,7 +1368,7 @@ class WebClientGitHubApiTest {
 
         val request = server.takeRequest()
         assertThat(request.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/master")
+        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
     }
 
     @Test
@@ -1376,11 +1376,11 @@ class WebClientGitHubApiTest {
         enqueueNotFound()
 
         StepVerifier.create(this.github.findFile(branch, "README.md"))
-            .verifyErrorSatisfies { e -> assertThat(e).hasMessage("Could not get file README.md for BranchRef(repository=RepositoryRef(fullName=rwinch/repository), ref=refs/heads/master) Got status 404 NOT_FOUND and body <empty body>") }
+            .verifyErrorSatisfies { e -> assertThat(e).hasMessage("Could not get file README.md for BranchRef(repository=RepositoryRef(fullName=rwinch/repository), ref=refs/heads/main) Got status 404 NOT_FOUND and body <empty body>") }
 
         val request = server.takeRequest()
         assertThat(request.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/master")
+        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
     }
 
     @Test
@@ -1527,7 +1527,7 @@ class WebClientGitHubApiTest {
                     "contents_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/contents/{+path}",
                     "contributors_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/contributors",
                     "created_at": "2018-12-04T20:05:53Z",
-                    "default_branch": "master",
+                    "default_branch": "main",
                     "deployments_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/deployments",
                     "description": null,
                     "downloads_url": "https://api.github.com/repos/rwinch/deleteme-backport-test/downloads",

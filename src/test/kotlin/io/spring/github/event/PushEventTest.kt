@@ -108,6 +108,6 @@ class PushEventTest {
 
     fun pushEvent(commitMessage : String) : PushEvent {
         val commits = listOf(PushEvent.Commit("sha", commitMessage))
-        return PushEvent("master", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), commits)
+        return PushEvent("main", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), commits)
     }
 }

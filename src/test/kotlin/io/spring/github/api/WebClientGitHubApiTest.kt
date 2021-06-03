@@ -115,7 +115,7 @@ class WebClientGitHubApiTest {
           ],
           "active": true,
           "config": {
-            "url": "http://example.com/webhook",
+            "url": "https://example.com/webhook",
             "content_type": "json"
           },
           "updated_at": "2011-09-06T20:39:23Z",
@@ -152,7 +152,7 @@ class WebClientGitHubApiTest {
             ],
             "active": true,
             "config": {
-              "url": "http://example.com/webhook",
+              "url": "https://example.com/webhook",
               "content_type": "json"
             },
             "updated_at": "2011-09-06T20:39:23Z",
@@ -171,7 +171,7 @@ class WebClientGitHubApiTest {
           ],
           "active": true,
           "config": {
-            "url": "http://example.com/webhook",
+            "url": "https://example.com/webhook",
             "content_type": "json"
           },
           "updated_at": "2011-09-06T20:39:23Z",
@@ -298,7 +298,7 @@ class WebClientGitHubApiTest {
           ],
           "active": true,
           "config": {
-            "url": "http://example.com/webhook",
+            "url": "https://example.com/webhook",
             "content_type": "json"
           },
           "updated_at": "2011-09-06T20:39:23Z",

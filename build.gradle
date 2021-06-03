@@ -13,46 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-buildscript {
-	ext {
-		kotlinVersion = '1.2.71'
-		springBootVersion = '2.1.4.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-		gradlePluginPortal()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-		classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-		classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.0.0"
-	}
+plugins {
+	id 'org.springframework.boot' version '2.5.0'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id "com.gorylenko.gradle-git-properties" version "2.3.1"
+	id "org.jetbrains.kotlin.jvm" version "1.5.10"
+	id "org.jetbrains.kotlin.plugin.spring" version "1.5.10"
 }
-
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-spring'
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: "com.gorylenko.gradle-git-properties"
 
 group = 'io.spring'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 1.8
-compileKotlin {
-	kotlinOptions {
-		freeCompilerArgs = ["-Xjsr305=strict"]
-		jvmTarget = "1.8"
-	}
-}
-compileTestKotlin {
-	kotlinOptions {
-		freeCompilerArgs = ["-Xjsr305=strict"]
-		jvmTarget = "1.8"
-	}
-}
 
 repositories {
 	mavenCentral()
@@ -76,9 +47,9 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-	compile('org.webjars:webjars-locator-core')
-	compile('org.webjars:bootstrap:3.3.6')
-	compile('org.webjars:jquery:1.11.3')
+	implementation('org.webjars:webjars-locator-core')
+	implementation('org.webjars:bootstrap:3.3.6')
+	implementation('org.webjars:jquery:1.11.3')
 
 	testImplementation('com.squareup.okhttp3:mockwebserver:3.12.0')
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
@@ -86,5 +57,5 @@ dependencies {
 	testImplementation('io.projectreactor:reactor-test')
 	testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
 	testImplementation "org.skyscreamer:jsonassert:1.5.0"
-	testCompile 'org.seleniumhq.selenium:htmlunit-driver'
+	testImplementation 'org.seleniumhq.selenium:htmlunit-driver'
 }

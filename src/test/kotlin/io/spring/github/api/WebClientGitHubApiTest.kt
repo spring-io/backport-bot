@@ -1773,6 +1773,13 @@ class WebClientGitHubApiTest {
         assertThat(this.server.takeRequest().requestUrl.url().toExternalForm()).isEqualTo(next)
     }
 
+    // gh-18
+    @Test
+    fun nextWhenPrevAndNext() {
+        val next = WebClientGitHubApi.next("<https://api.github.com/repositories/3148979/issues/9610/timeline?page=1>; rel=\"prev\", <https://api.github.com/repositories/3148979/issues/9610/timeline?page=3>; rel=\"next\", <https://api.github.com/repositories/3148979/issues/9610/timeline?page=3>; rel=\"last\", <https://api.github.com/repositories/3148979/issues/9610/timeline?page=1>; rel=\"first\"")
+        assertThat(next).isEqualTo("https://api.github.com/repositories/3148979/issues/9610/timeline?page=3")
+    }
+
     @Test
     fun findIssueTimelineWhenPaginationWhenNoNext() {
         val baseUrl = this.server.url("")

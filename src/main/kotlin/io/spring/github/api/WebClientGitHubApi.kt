@@ -331,16 +331,22 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
     }
 
     private fun next(httpHeaders : HttpHeaders) : String? {
-        val linkHeaderValue = httpHeaders.getFirst("Link")
-        if (linkHeaderValue == null) {
-            return null
-        }
-        val nextRegex = """.*?<(.*?)>; rel="next".*""".toRegex()
-        if (!linkHeaderValue.matches(nextRegex)) {
-            return null
-        }
-        return linkHeaderValue.replace(nextRegex, "$1")
-    }
+		val linkHeaderValue = httpHeaders.getFirst("Link")
+		return next(linkHeaderValue)
+	}
+
+	companion object {
+		fun next(linkHeaderValue: String?): String? {
+			if (linkHeaderValue == null) {
+				return null
+			}
+			val nextRegex = """.*<(.*?)>; rel="next".*""".toRegex()
+			if (!linkHeaderValue.matches(nextRegex)) {
+				return null
+			}
+			return linkHeaderValue.replace(nextRegex, "$1")
+		}
+	}
 
     data class GitHubMilestone(val number : Int, val title : String)
 

@@ -16,7 +16,7 @@
 
 package io.spring.github
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import io.spring.github.event.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before

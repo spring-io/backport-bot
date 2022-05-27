@@ -16,8 +16,7 @@
 
 package io.spring.github
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
+import org.mockito.kotlin.*
 import io.spring.github.api.GitHubApi
 import io.spring.github.api.Permission
 import io.spring.github.webdriver.pages.IndexPage

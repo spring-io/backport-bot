@@ -16,7 +16,7 @@
 
 package io.spring.github
 
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired

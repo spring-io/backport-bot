@@ -33,7 +33,7 @@ import reactor.test.StepVerifier
 class WebClientGitHubApiTest {
     private val server = MockWebServer()
 
-    private val baseUrl = server.url("").url().toExternalForm()
+    private val baseUrl = server.url("").toUrl().toExternalForm()
 
     private val github = WebClientGitHubApi(baseGitHubUrl = baseUrl)
 
@@ -128,11 +128,11 @@ class WebClientGitHubApiTest {
 
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.GET.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
         }
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.POST.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
             JSONAssert.assertEquals("""{"config":{"url":"https://example.com/","secret":"secret","content_type":"json"},"events":["push"],"name":"web"}""", body.readUtf8(), true)
         }
     }
@@ -184,11 +184,11 @@ class WebClientGitHubApiTest {
 
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.GET.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
         }
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.POST.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
             JSONAssert.assertEquals("""{"config":{"url":"https://example.com/","secret":"secret","content_type":"json"},"events":["push"],"name":"web"}""", body.readUtf8(), true)
         }
     }
@@ -255,11 +255,11 @@ class WebClientGitHubApiTest {
 
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.GET.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
         }
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.POST.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
             JSONAssert.assertEquals("""{"config":{"url":"https://example.com/","secret":"secret","content_type":"json"},"events":["push"],"name":"web"}""", body.readUtf8(), true)
         }
     }
@@ -311,11 +311,11 @@ class WebClientGitHubApiTest {
 
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.GET.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks")
         }
         this.server.takeRequest()!!.apply {
             assertThat(method).isEqualTo(HttpMethod.PATCH.name)
-            assertThat(requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks/1")
+            assertThat(requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${repository.fullName}/hooks/1")
             JSONAssert.assertEquals("""{"config":{"url":"https://example.com/","secret":"secret","content_type":"json"},"events":["push"],"name":"web"}""", body.readUtf8(), true)
         }
     }
@@ -368,7 +368,7 @@ class WebClientGitHubApiTest {
 
         val findMilestoneRequest = server.takeRequest()
         assertThat(findMilestoneRequest.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(findMilestoneRequest.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/milestones")
+        assertThat(findMilestoneRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/milestones")
     }
 
     @Test
@@ -456,7 +456,7 @@ class WebClientGitHubApiTest {
 
         val findMilestoneRequest = server.takeRequest()
         assertThat(findMilestoneRequest.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(findMilestoneRequest.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/milestones")
+        assertThat(findMilestoneRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/milestones")
     }
 
     @Test
@@ -765,7 +765,7 @@ class WebClientGitHubApiTest {
 
         val createIssueRequest = server.takeRequest()
         assertThat(createIssueRequest.method).isEqualTo(HttpMethod.POST.name);
-        assertThat(createIssueRequest.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/issues")
+        assertThat(createIssueRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues")
         JSONAssert.assertEquals("""{"title":"Title","body":"Body","milestone":1,"labels":["label"],"assignees":["rwinch"]}""", createIssueRequest.body.readUtf8(), true)
     }
 
@@ -944,7 +944,7 @@ class WebClientGitHubApiTest {
 
         val request = server.takeRequest()
         assertThat(request.method).isEqualTo(HttpMethod.PATCH.name);
-        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347")
+        assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347")
         JSONAssert.assertEquals("""{"state":"closed"}""", request.body.readUtf8(), true)
     }
 
@@ -1112,7 +1112,7 @@ class WebClientGitHubApiTest {
             .verifyComplete()
 
         val request = server.takeRequest()
-        assertThat(request.requestUrl.url().toExternalForm()).isEqualTo("${baseUrl}repos/${issue.repository.fullName}/issues/${issue.number}")
+        assertThat(request.requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${issue.repository.fullName}/issues/${issue.number}")
         assertThat(request.method).isEqualTo(HttpMethod.PATCH.name)
         JSONAssert.assertEquals("""{labels: ["bugs"]}""", request.body.readUtf8(), true)
     }
@@ -1155,7 +1155,7 @@ class WebClientGitHubApiTest {
 
         val request = server.takeRequest()
         assertThat(request.method).isEqualTo(HttpMethod.POST.name);
-        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347/comments")
+        assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347/comments")
         JSONAssert.assertEquals("""{"body":"Me too"}""", request.body.readUtf8(), true)
     }
 
@@ -1328,7 +1328,7 @@ class WebClientGitHubApiTest {
 
         val findIssueRequest = server.takeRequest()
         assertThat(findIssueRequest.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(findIssueRequest.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347")
+        assertThat(findIssueRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347")
     }
 
     @Test
@@ -1368,7 +1368,7 @@ class WebClientGitHubApiTest {
 
         val request = server.takeRequest()
         assertThat(request.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
+        assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
     }
 
     @Test
@@ -1380,7 +1380,7 @@ class WebClientGitHubApiTest {
 
         val request = server.takeRequest()
         assertThat(request.method).isEqualTo(HttpMethod.GET.name);
-        assertThat(request.requestUrl.url().toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
+        assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
     }
 
     @Test
@@ -1769,8 +1769,8 @@ class WebClientGitHubApiTest {
         val timeline = github.findIssueTimeline(issue).collectList().block()!!
 
         assertThat(timeline).hasSize(2)
-        assertThat(this.server.takeRequest().requestUrl.url()).hasPath("/repos/rwinch/repository/issues/1347/timeline")
-        assertThat(this.server.takeRequest().requestUrl.url().toExternalForm()).isEqualTo(next)
+        assertThat(this.server.takeRequest().requestUrl?.toUrl()).hasPath("/repos/rwinch/repository/issues/1347/timeline")
+        assertThat(this.server.takeRequest().requestUrl?.toUrl()?.toExternalForm()).isEqualTo(next)
     }
 
     // gh-18
@@ -1821,7 +1821,7 @@ class WebClientGitHubApiTest {
         val timeline = github.findIssueTimeline(issue).collectList().block()!!
 
         assertThat(timeline).hasSize(1)
-        assertThat(this.server.takeRequest().requestUrl.url()).hasPath("/repos/rwinch/repository/issues/1347/timeline")
+        assertThat(this.server.takeRequest().requestUrl?.toUrl()).hasPath("/repos/rwinch/repository/issues/1347/timeline")
     }
     @Test
     fun findLabelsWhenSinglePageThenWorks() {

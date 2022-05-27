@@ -16,7 +16,7 @@
 
 package io.spring.github
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import io.spring.github.api.*
 import io.spring.github.event.DefaultBackportService
 import io.spring.github.event.IssueEvent

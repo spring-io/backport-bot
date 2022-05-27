@@ -16,23 +16,15 @@
 
 package io.spring.github.event
 
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
 /**
  * @author Rob Winch
  */
-@RestController
-@RequestMapping("/events/")
+@Component
 class GitHubHooksController(val events : GithubEventService) {
-
-    @RequestMapping(headers = arrayOf("X-GitHub-Event=ping"))
-    fun githubEventPing(): String {
-        return "SUCCESS"
-    }
 
     /**
      * @param body
@@ -40,12 +32,11 @@ class GitHubHooksController(val events : GithubEventService) {
      * @return
      * @throws Exception
      */
-    @RequestMapping(path = arrayOf("/"), headers = arrayOf("X-GitHub-Event=push"))
-    fun githubEventPush(@RequestBody pushEvent: PushEvent): ResponseEntity<String> {
+    fun githubEventPush(@RequestBody pushEvent: PushEvent): Result {
         return this.events.backport(pushEvent)
                 .filter { backported -> backported }
-                .map { ResponseEntity("Created", HttpStatus.CREATED) }
-                .defaultIfEmpty(ResponseEntity.ok("OK"))
+                .map { Result.CREATED }
+                .defaultIfEmpty(Result.OK)
                 .block()!!
     }
 
@@ -56,11 +47,11 @@ class GitHubHooksController(val events : GithubEventService) {
      * @throws Exception
      */
     @RequestMapping(path = arrayOf("/"), headers = arrayOf("X-GitHub-Event=issues"))
-    fun githubEvent(@RequestBody issueEvent : IssueEvent): ResponseEntity<String> {
+    fun githubEvent(@RequestBody issueEvent : IssueEvent): Result {
         return this.events.backport(issueEvent)
                 .filter { backported -> backported }
-                .map { ResponseEntity("Created", HttpStatus.CREATED) }
-                .defaultIfEmpty(ResponseEntity.ok("OK"))
+                .map { Result.CREATED }
+                .defaultIfEmpty(Result.OK)
                 .block()!!
     }
 
@@ -71,11 +62,15 @@ class GitHubHooksController(val events : GithubEventService) {
      * @throws Exception
      */
     @RequestMapping(path = arrayOf("/"), headers = arrayOf("X-GitHub-Event=pull_request"))
-    fun githubPullRequestEvent(@RequestBody pullRequestEvent: PullRequestEvent): ResponseEntity<String> {
+    fun githubPullRequestEvent(@RequestBody pullRequestEvent: PullRequestEvent): Result {
         return this.events.backport(pullRequestEvent)
                 .filter { backported -> backported }
-                .map { ResponseEntity("Created", HttpStatus.CREATED) }
-                .defaultIfEmpty(ResponseEntity.ok("OK"))
+                .map { Result.CREATED }
+                .defaultIfEmpty(Result.OK)
                 .block()!!
+    }
+
+    enum class Result {
+        OK, CREATED, UNDEFINED
     }
 }

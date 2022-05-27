@@ -18,7 +18,7 @@ package io.spring.github.api
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId
+import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
@@ -77,48 +77,6 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 }
     }
 
-    override fun saveHook(saveHook : SaveHook) : Mono<Void> {
-        return getHooks(saveHook.repository)
-            .filter { h -> h.config.url == saveHook.config.url }
-            .next()
-            .flatMap { h -> editHook(h.id, saveHook) }
-            .switchIfEmpty(createNewHook(saveHook))
-            .then()
-    }
-
-    // FIXME: If there are paged hooks this doesn't work
-    private fun getHooks(repository: RepositoryRef) : Flux<Hook> {
-        return webClient
-            .get()
-            .uri("$baseGitHubUrl/repos/${repository.fullName}/hooks")
-            .attributes(clientRegistrationId("github"))
-            .retrieve()
-            .bodyToFlux<Hook>()
-    }
-
-    private fun editHook(id: Int, saveHook: SaveHook): Mono<String> {
-        return webClient
-                .patch()
-                .uri("$baseGitHubUrl/repos/${saveHook.repository.fullName}/hooks/$id")
-                .attributes(clientRegistrationId("github"))
-                .syncBody(saveHook)
-                .retrieve()
-                .bodyToMono<String>()
-    }
-
-    private fun createNewHook(saveHook: SaveHook): Mono<String> {
-        return webClient
-                .post()
-                .uri("$baseGitHubUrl/repos/${saveHook.repository.fullName}/hooks")
-                .attributes(clientRegistrationId("github"))
-                .syncBody(saveHook)
-                .retrieve()
-                .bodyToMono<String>()
-    }
-
-    data class Hook(val id: Int, val config: Config) {
-        data class Config(val url : String?)
-    }
 
     override fun closeIssue(issueRef: IssueRef): Mono<Void> {
         return updateIssue(issueRef, mapOf(Pair("state", "closed")))
@@ -331,22 +289,16 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
     }
 
     private fun next(httpHeaders : HttpHeaders) : String? {
-		val linkHeaderValue = httpHeaders.getFirst("Link")
-		return next(linkHeaderValue)
-	}
-
-	companion object {
-		fun next(linkHeaderValue: String?): String? {
-			if (linkHeaderValue == null) {
-				return null
-			}
-			val nextRegex = """.*<(.*?)>; rel="next".*""".toRegex()
-			if (!linkHeaderValue.matches(nextRegex)) {
-				return null
-			}
-			return linkHeaderValue.replace(nextRegex, "$1")
-		}
-	}
+        val linkHeaderValue = httpHeaders.getFirst("Link")
+        if (linkHeaderValue == null) {
+            return null
+        }
+        val nextRegex = """.*?<(.*?)>; rel="next".*""".toRegex()
+        if (!linkHeaderValue.matches(nextRegex)) {
+            return null
+        }
+        return linkHeaderValue.replace(nextRegex, "$1")
+    }
 
     data class GitHubMilestone(val number : Int, val title : String)
 

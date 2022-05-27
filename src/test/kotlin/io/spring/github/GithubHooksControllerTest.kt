@@ -16,49 +16,44 @@
 
 package io.spring.github
 
-import org.mockito.kotlin.*
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.spring.github.event.*
+import io.spring.github.event.GitHubHooksController.Result.CREATED
+import io.spring.github.event.GitHubHooksController.Result.OK
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
-import org.junit.Test
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.assertj.core.api.Assertions.assertThatIllegalArgumentException
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.TestPropertySource
 import reactor.core.publisher.Mono
 
 /**
  * @author Rob Winch
  */
+@SpringBootTest
+@TestPropertySource(properties = arrayOf("github.accessToken=some-secret"))
 class GithubHooksControllerTest {
-    var events : GithubEventService = mock()
-    lateinit var gitHubHooksController : GitHubHooksController
-    lateinit var mockMvc : MockMvc
-
-    @Before
-    fun setup() {
-        gitHubHooksController = GitHubHooksController(events)
-        mockMvc = MockMvcBuilders.standaloneSetup(gitHubHooksController)
-        .build();
-    }
-
-    // ping
-
-    @Test
-    @Throws(Exception::class)
-    fun githubPingEventThenOk() {
-        this.mockMvc.perform(post("/events/").header("X-GitHub-Event", "ping"))
-                .andExpect(status().isOk)
-    }
+    @MockBean
+    lateinit var  events : GithubEventService
+    @MockBean
+    lateinit var  runner : BackportBotCommandLineRunner
+    @Autowired
+    lateinit var controller : GitHubHooksController
+    @Autowired
+    lateinit var objectMapper : ObjectMapper
 
     // pull_request
 
     @Test
     fun githubPullRequestEventWhenLabeledAndNotBackportThenCreated() {
         whenever(events.backport(any<PullRequestEvent>())).thenReturn(Mono.just(true))
-        this.mockMvc.perform(pullRequestRequest(pullRequestLabeledBody))
-                .andExpect(status().isCreated)
+        assertThat(runWithArgs(pullRequestRequest(pullRequestLabeledBody))).isEqualTo(CREATED)
 
         val a = argumentCaptor<PullRequestEvent>()
         verify(events).backport(a.capture())
@@ -77,15 +72,13 @@ class GithubHooksControllerTest {
     @Test
     fun githubIssuesEventWhenLabeledAndNotBackportThenOk() {
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(issueLabeledBody))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(issueLabeledBody))).isEqualTo(OK)
     }
 
     @Test
     fun githubIssuesEventWhenLabeledAndNotBackportThenCreated() {
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(true));
-        this.mockMvc.perform(issuesRequest(issueLabeledBody))
-                .andExpect(status().isCreated)
+        assertThat(runWithArgs(issuesRequest(issueLabeledBody))).isEqualTo(CREATED)
     }
 
 
@@ -260,8 +253,7 @@ class GithubHooksControllerTest {
         }
         """.trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -442,8 +434,7 @@ class GithubHooksControllerTest {
         }
         """.trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -614,8 +605,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -786,8 +776,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -959,8 +948,7 @@ class GithubHooksControllerTest {
         }
         """.trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -1131,8 +1119,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -1303,8 +1290,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -1475,8 +1461,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -1705,8 +1690,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -1897,8 +1881,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     // labeled is one we actually care about
@@ -2079,8 +2062,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -2287,8 +2269,7 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     @Test
@@ -2459,24 +2440,19 @@ class GithubHooksControllerTest {
           }
         }""".trimIndent()
         whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(issuesRequest(body))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
     }
 
     //
     @Test
-    @Throws(Exception::class)
     fun githubInvalidEventThenNotFound() {
-        this.mockMvc.perform(post("/").header("X-GitHub-Event", "invalid"))
-                .andExpect(status().isNotFound)
+        assertThatIllegalArgumentException().isThrownBy { runWithArgs(listOf("--invalid", "content")) }
     }
 
     @Test
-    @Throws(Exception::class)
     fun githubPushEventWhenValidBodyThenPushEventValid() {
         whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(true));
-        this.mockMvc.perform(pushRequest(pushEventBody))
-                .andExpect(status().isCreated)
+        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(CREATED)
 
         argumentCaptor<PushEvent>().apply {
             verify(events).backport(capture())
@@ -2491,43 +2467,35 @@ class GithubHooksControllerTest {
     }
 
     @Test
-    @Throws(Exception::class)
     fun githubPushEventWhenBackportTrueThenCreated() {
         whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(true));
-        this.mockMvc.perform(pushRequest(pushEventBody))
-                .andExpect(status().isCreated)
+        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(CREATED)
     }
 
     @Test
-    @Throws(Exception::class)
     fun githubPushEventWhenBackportFalseThenOk() {
         whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(false));
-        this.mockMvc.perform(pushRequest(pushEventBody))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(OK)
     }
 
     @Test
-    @Throws(Exception::class)
     fun githubPushEventWhenBackportEmptyThenOk() {
         whenever(events.backport(any<PushEvent>())).thenReturn(Mono.empty());
-        this.mockMvc.perform(pushRequest(pushEventBody))
-                .andExpect(status().isOk)
+        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(OK)
     }
 
-    private fun pushRequest(content: String) = post("/events/")
-            .content(content)
-            .header("X-GitHub-Event", "push")
-            .contentType(MediaType.APPLICATION_JSON)
+    fun runWithArgs(args : List<String>) : GitHubHooksController.Result {
+        val runner = BackportBotCommandLineRunner(this.controller, this.objectMapper)
 
-    private fun issuesRequest(content: String) = post("/events/")
-            .content(content)
-            .header("X-GitHub-Event", "issues")
-            .contentType(MediaType.APPLICATION_JSON)
+        runner.run(*args.toTypedArray())
+        return runner.created
+    }
 
-    private fun pullRequestRequest(content: String) = post("/events/")
-            .content(content)
-            .header("X-GitHub-Event", "pull_request")
-            .contentType(MediaType.APPLICATION_JSON)
+    private fun pushRequest(content: String) = listOf("--push", content, "--github.accessToken", "some-secret")
+
+    private fun issuesRequest(content: String) = listOf("--issues", content, "--github.accessToken", "some-secret")
+
+    private fun pullRequestRequest(content: String) = listOf("--pull-request", content, "--github.accessToken", "some-secret")
 
     val issueLabeledBody = """
     {
@@ -3326,7 +3294,7 @@ class GithubHooksControllerTest {
             "ssh_url": "git@github.com:spring-projects/spring-security.git",
             "clone_url": "https://github.com/spring-projects/spring-security.git",
             "svn_url": "https://github.com/spring-projects/spring-security",
-            "homepage": "https://spring.io/spring-security",
+            "homepage": "http://spring.io/spring-security",
             "size": 33219,
             "stargazers_count": 2994,
             "watchers_count": 2994,

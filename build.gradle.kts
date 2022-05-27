@@ -33,33 +33,26 @@ tasks.withType<KotlinCompile> {
 	}
 }
 
+tasks.withType<Test> {
+	useJUnitPlatform()
+}
+
 repositories {
 	mavenCentral()
 }
 
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-devtools")
-	implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
-	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-	implementation("org.webjars:webjars-locator-core")
-	implementation("org.webjars:bootstrap:3.3.6")
-	implementation("org.webjars:jquery:1.11.3")
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 	testImplementation("com.squareup.okhttp3:mockwebserver")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 	testImplementation("org.skyscreamer:jsonassert")
-	implementation("org.seleniumhq.selenium:htmlunit-driver")
 }

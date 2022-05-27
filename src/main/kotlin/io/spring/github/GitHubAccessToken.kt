@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.spring.github
 
-var claCclaSign = (function () {
-	var claCclaSign = {};
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Configuration
 
-	function initialize() {
-		$("[data-toggle=popover]").popover({html: true});
-		$("#print").click(function(e) {
-			window.print();
-			e.preventDefault();
-		});
-	}
-
-	// exports
-	claCclaSign.initialize = initialize;
-
-	return claCclaSign;
-})
-();
-
-claCclaSign.initialize();
+/**
+ * @author Rob Winch
+ */
+@Configuration
+@ConfigurationProperties(prefix = "github")
+internal class GitHubAccessToken {
+    lateinit var accessToken : String
+}

@@ -33,6 +33,35 @@ class PushEvent(val ref : String, val repository : Repository, val pusher : Push
         return BranchRef(RepositoryRef(repository.fullName), ref)
     }
 
+
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PushEvent
+
+        if (ref != other.ref) return false
+        if (repository != other.repository) return false
+        if (pusher != other.pusher) return false
+        if (commits != other.commits) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = ref.hashCode()
+        result = 31 * result + repository.hashCode()
+        result = 31 * result + pusher.hashCode()
+        result = 31 * result + commits.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "PushEvent(ref='$ref', repository=$repository, pusher=$pusher, commits=$commits)"
+    }
+
+
     data class Commit(val id : String, val message : String) {
         val r = """.*?(Fixes|Closes):?\s+(gh\-|#)(?<id>\d+)(\r?\n)*""".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 

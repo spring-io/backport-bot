@@ -37,6 +37,6 @@ class BackportBotCommandLineRunner(val controller : GitHubHooksController, val o
     }
 
     private fun usage(args: Array<out String?>) {
-        throw java.lang.IllegalArgumentException("Invalid usage. Expected java -jar jarname.jar --github.accessToken <github.accessToken> --github.event_name <github.event_name> --github.event <github.event>")
+        throw java.lang.IllegalArgumentException("Invalid usage Got ${args.size} arguments. Expected 6: java -jar jarname.jar --github.accessToken <github.accessToken> --github.event_name <github.event_name> --github.event <github.event>")
     }
 }

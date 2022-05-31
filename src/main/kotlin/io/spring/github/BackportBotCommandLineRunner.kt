@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component
 class BackportBotCommandLineRunner(val controller : GitHubHooksController, val objectMapper : ObjectMapper) : CommandLineRunner {
     var created : GitHubHooksController.Result = GitHubHooksController.Result.UNDEFINED
     override fun run(vararg args: String?) {
-        if (args.size != 6) {
+        if (args.size != 5) {
             usage(args);
         }
-        val action = args[3]
-        val event = args[5]
+        val action = args[2]
+        val event = args[4]
         when(action) {
             "pull_request" -> {
                 val pullRequest = this.objectMapper.readValue(event, PullRequestEvent::class.java)
@@ -37,6 +37,6 @@ class BackportBotCommandLineRunner(val controller : GitHubHooksController, val o
     }
 
     private fun usage(args: Array<out String?>) {
-        throw java.lang.IllegalArgumentException("Invalid usage Got ${args.size} arguments. Expected 6: java -jar jarname.jar --github.accessToken <github.accessToken> --github.event_name <github.event_name> --github.event <github.event>")
+        throw java.lang.IllegalArgumentException("Invalid usage Got ${args.size} arguments. Expected 5: java -jar jarname.jar --github.accessToken=<github.accessToken> --github.event_name <github.event_name> --github.event <github.event>")
     }
 }

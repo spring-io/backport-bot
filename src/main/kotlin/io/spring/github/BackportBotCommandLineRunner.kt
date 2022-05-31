@@ -12,22 +12,22 @@ import org.springframework.stereotype.Component
 class BackportBotCommandLineRunner(val controller : GitHubHooksController, val objectMapper : ObjectMapper) : CommandLineRunner {
     var created : GitHubHooksController.Result = GitHubHooksController.Result.UNDEFINED
     override fun run(vararg args: String?) {
-        if (args.size < 2) {
+        if (args.size != 6) {
             usage(args);
         }
-        val command = args[0]
-        val json = args[1]
-        when(command) {
-            "--pull-request" -> {
-                val pullRequest = this.objectMapper.readValue(json, PullRequestEvent::class.java)
+        val action = args[3]
+        val event = args[5]
+        when(action) {
+            "pull_request" -> {
+                val pullRequest = this.objectMapper.readValue(event, PullRequestEvent::class.java)
                 this.created = controller.githubPullRequestEvent(pullRequest)
             }
-            "--issues" -> {
-                val issues = this.objectMapper.readValue(json, IssueEvent::class.java)
+            "issues" -> {
+                val issues = this.objectMapper.readValue(event, IssueEvent::class.java)
                 this.created = controller.githubEvent(issues)
             }
-            "--push" -> {
-                val push = this.objectMapper.readValue(json, PushEvent::class.java)
+            "push" -> {
+                val push = this.objectMapper.readValue(event, PushEvent::class.java)
                 this.created = controller.githubEventPush(push)
             }
             else -> {
@@ -37,6 +37,6 @@ class BackportBotCommandLineRunner(val controller : GitHubHooksController, val o
     }
 
     private fun usage(args: Array<out String?>) {
-        throw java.lang.IllegalArgumentException("Invalid usage. Got " + args)
+        throw java.lang.IllegalArgumentException("Invalid usage. Expected java -jar jarname.jar --github.accessToken <github.accessToken> --github.event_name <github.event_name> --github.event <github.event>")
     }
 }

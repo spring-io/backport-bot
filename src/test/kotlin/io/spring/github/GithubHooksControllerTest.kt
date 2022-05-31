@@ -2491,11 +2491,11 @@ class GithubHooksControllerTest {
         return runner.created
     }
 
-    private fun pushRequest(content: String) = listOf("--push", content, "--github.accessToken", "some-secret")
+    private fun pushRequest(content: String) = listOf("--github.accessToken", "some-secret","--github.event_name", "push", "--github.event", content)
 
-    private fun issuesRequest(content: String) = listOf("--issues", content, "--github.accessToken", "some-secret")
+    private fun issuesRequest(content: String) = listOf("--github.accessToken", "some-secret","--github.event_name", "issues", "--github.event", content)
 
-    private fun pullRequestRequest(content: String) = listOf("--pull-request", content, "--github.accessToken", "some-secret")
+    private fun pullRequestRequest(content: String) = listOf("--github.accessToken", "some-secret","--github.event_name", "pull_request", "--github.event", content)
 
     val issueLabeledBody = """
     {

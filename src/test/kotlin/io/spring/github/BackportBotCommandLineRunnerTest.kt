@@ -22,7 +22,7 @@ class BackportBotCommandLineRunnerTest {
         whenever(controller.githubPullRequestEvent(any())).thenReturn(GitHubHooksController.Result.CREATED)
         val application = SpringApplication(BackportBotApplication::class.java)
         application.addInitializers(ReplaceBeanInitializer(GitHubHooksController::class.java, controller))
-        application.run("--pull-request", pullRequestLabeledBody, "--github.accessToken", "some-secret").use { }
+        application.run("--github.accessToken", "some-secret", "--github.event_name", "pull_request", "--github_event", pullRequestLabeledBody).use { }
         val pullRequest = PullRequest(156, "Here it is", null, listOf(PullRequest.Label("for: backport-to-1.0.x"), PullRequest.Label("for: backport-to-1.1.x")))
         verify(controller).githubPullRequestEvent(PullRequestEvent("labeled", Repository("rwinch/deleteme-backport-test"), PullRequestEvent.Label("for: backport-to-1.1.x"), pullRequest))
     }
@@ -33,7 +33,7 @@ class BackportBotCommandLineRunnerTest {
         whenever(controller.githubEvent(any())).thenReturn(GitHubHooksController.Result.CREATED)
         val application = SpringApplication(BackportBotApplication::class.java)
         application.addInitializers(ReplaceBeanInitializer(GitHubHooksController::class.java, controller))
-        application.run("--issues", issueLabeledBody, "--github.accessToken", "some-secret").use { }
+        application.run("--github.accessToken", "some-secret", "--github.event_name", "issues", "--github_event", issueLabeledBody).use { }
         val issueEvent = IssueEvent("labeled", IssueEvent.Repository("rwinch/deleteme-backport-test"), IssueEvent.Sender("rwinch"), IssueEvent.Label("backport: 1.0.x"), Issue(40, "An Issue", null, listOf(Issue.Label("backport: 1.0.x"))))
         verify(controller).githubEvent(issueEvent)
     }
@@ -44,7 +44,7 @@ class BackportBotCommandLineRunnerTest {
         whenever(controller.githubEventPush(any())).thenReturn(GitHubHooksController.Result.CREATED)
         val application = SpringApplication(BackportBotApplication::class.java)
         application.addInitializers(ReplaceBeanInitializer(GitHubHooksController::class.java, controller))
-        application.run("--push", pushEventBody, "--github.accessToken", "some-secret").use { }
+        application.run("--github.accessToken", "some-secret", "--github.event_name", "push", "--github_event", pushEventBody).use { }
         val pushEvent = PushEvent("refs/heads/main", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), listOf(PushEvent.Commit("60fc5381fe9f094e56bbb279b857eaec318f5c0f", "Fixed Git SCM book link")))
         verify(controller).githubEventPush(pushEvent)
     }

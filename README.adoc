@@ -1,10 +1,12 @@
+= BackportBot
+
 BackportBot handles backports
 
-= Behavior
+== Behavior
 
 The BackportBot assists in creating backport issues and automatically closing backport issues.
 
-== Creating Backport
+=== Creating Backport
 
 The BackportBot can create issues in two different ways.
 In either case the following logic is used:
@@ -14,64 +16,47 @@ In either case the following logic is used:
   * Update the existing issue with the label `status: backported`
 * Automatically remove the `for: backport-to-<branch-name>` label from the existing issue
 
-=== Via Labels
+==== Via Labels
 
 You can add a label in the form of `for: backport-to-<branch-name>` (i.e. for: backport-to-5.1.x) and
 adding the label to a ticket will create a backport for the branch `<branch-name>` (i.e. 5.1.x).
 
-=== Pushing to Branch
+==== Pushing to Branch
 
 You can create a backport by pushing to a branch that ends in `.x` with `Fixes: gh-<number>` in the commit message.
 
-== Closing Backport
+=== Closing Backport
 
 If a branch ending in `.x` is pushed to, the BackportBot will look at the commit message for the pattern `Fixes: gh-<number>`.
 If the pattern is found, it looks up the issue `<number>` and closes the backport that has a milestone corresponding to the gradle.properties in the branch that is being pushed to.
 
-= Running the Application
+== Running the Application
 
-== Create an OAuth App
+The application is intended to be run as a GitHub Action. Here is an example workflow:
 
-The first step is to https://github.com/settings/developers[create an OAuth App].
-Example values are:
+.backport-bot.yml
+[source,yml]
+----
+name: Backport Bot
 
-* Application name: `BackportBot`
-* Homepage URL: `https://backportbot.apps.pcfone.io/`
-* Application description: `Manages backports`
-* Authorization callback URL: `https://backportbot.apps.pcfone.io/login/oauth2/code/github`
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+  push:
+    branches:
+      - '*.x'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - run: wget https://github.com/spring-io/backport-bot/releases/download/latest/backport-bot-0.0.1-SNAPSHOT.jar
+      - run: java -jar backport-bot-0.0.1-SNAPSHOT.jar --github.accessToken="${{ secrets.GITHUB_TOKEN }}" --github.event_name "${{ github.event_name }}" --github.event '${{ toJSON(github.event) }}'
+----
 
-NOTE: The user that creates the OAuth application will need to be granted access to spring-io to read organizational data.
-The request can be made when the first user that is part of the spring team logs into the application by clicking the request button next to the spring-io organization.
-The request will then need to be confirmed before users are granted access.
-
-The credentials should be placed in `client-id` and `client-secret` within link:src/main/resources/application-local.yml[src/main/resources/application-local.yml] which is setup to be ignored so you don't accidentally commit your credentials.
-
-This is used to authenticate the user.
-The access token is then used to determine if the user is authorized by determining if they are part of the Spring team in spring-io.
-Finally, the access token is used to create a Web Hook that processes push and issue events.
-See the comments in the file for additional details.
-
-== Personal Access Token
-
-The next step is to https://github.com/settings/tokens[generate a personal access token].
-
-The token should be placed in `personal-access-token` within link:src/main/resources/application-local.yml[src/main/resources/application-local.yml] which is setup to be ignored so you don't accidentally commit your credentials.
-
-This is used for editing issues. (spring-issuemaster) that is editing issues
-The token should have scope `public_repo`
-The user should also have push (write) access to any repo so that it can edit issues.
-The user used to create the token is who edits the issues.
-
-== WebHook Secret
-
-The last step is to generate a secure random secret that is used by https://developer.github.com/webhooks/securing/#setting-your-secret-token[GitHub's WebHooks]
-The application will setup the hooks with this value and also use the value to validate the signature passed into it.
-
-The secret should be placed in `webhook-secret` within link:src/main/resources/application-local.yml[src/main/resources/application-local.yml] which is setup to be ignored so you don't accidentally commit your credentials.
-
-
-== Running Locally
-
-If you are running locally, you will need to expose your local computer to the internet so that GitHub can invoke the webhook on your local machine.
-To do this you can use a tool like https://ngrok.com/download[ngrok].
-After installing, you can run `./ngrok http 8080` to get a URL that forwards requests from a public URL to your local 8080 port.

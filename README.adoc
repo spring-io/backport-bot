@@ -34,6 +34,8 @@ If the pattern is found, it looks up the issue `<number>` and closes the backpor
 
 The application is intended to be run as a GitHub Action. Here is an example workflow:
 
+NOTE: The workflow should be present on every branch that you wish to be supported (branches is a filter and the workflow https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#about-workflow-triggers[will not operate] on branches that the workflow is not defined on).
+
 .backport-bot.yml
 [source,yml]
 ----

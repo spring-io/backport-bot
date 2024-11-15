@@ -22,8 +22,10 @@ import org.junit.Test
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 class PushEventTest {
+
     @Test
     fun getFixedIssueIdsWhenOnlyFixesThenFindValue() {
         val e = pushEvent("Fixes: gh-123")
@@ -109,6 +111,12 @@ class PushEventTest {
     @Test
     fun getFixedIssueIdWhenSubjectAndIssueLinkThenFindValues() {
         val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/issues/123")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+    }
+
+    @Test
+    fun getFixedIssueIdWhenSubjectAndPullRequestLinkThenFindValues() {
+        val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/pull/123")
         assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
     }
 

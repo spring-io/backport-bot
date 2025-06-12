@@ -17,15 +17,39 @@
 package io.spring.github
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatNoException
 import org.junit.jupiter.api.Test
+import java.net.URI
 
 /**
  * @author Rob Winch
  */
 class RegexTest {
-    @Test
-    fun regex() {
-        val r = """Fixes: gh-\d+""".toRegex()
-        assertThat(r.containsMatchIn("Hi\n\nHello\r\n\r\nFixes: gh-123")).isTrue()
-    }
+
+	@Test
+	fun regex() {
+		val r = """Fixes: gh-\d+""".toRegex()
+		assertThat(r.containsMatchIn("Hi\n\nHello\r\n\r\nFixes: gh-123")).isTrue()
+	}
+
+	@Test
+	fun nextLinkReplace() {
+		var linkHeaderValue =
+			"""<https://api.github.com/repositories/2090979/issues/10083/timeline?page=1>; rel="prev", <https://api.github.com/repositories/2090979/issues/10083/timeline?page=3>; rel="next", <https://api.github.com/repositories/2090979/issues/10083/timeline?page=3>; rel="last", <https://api.github.com/repositories/2090979/issues/10083/timeline?page=1>; rel="first""""
+
+		val relPrevToken = """rel="prev", """
+
+		val index = linkHeaderValue.indexOf(relPrevToken)
+		if (index != -1) {
+			linkHeaderValue = linkHeaderValue.substring(index + relPrevToken.length)
+		}
+
+		val nextRegex = """.*?<(.*?)>; rel="next".*"""
+		assertThat(linkHeaderValue).matches(nextRegex)
+
+		assertThatNoException().isThrownBy {
+			URI.create(linkHeaderValue.replace(nextRegex.toRegex(), "$1"))
+		}
+	}
+
 }

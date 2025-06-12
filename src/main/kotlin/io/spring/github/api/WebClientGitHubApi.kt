@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.*
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val baseGitHubUrl: String = "https://api.github.com") : GitHubApi {
     override fun getPermissionForDefaultLogin(repositoryRef: RepositoryRef, accessToken: String): Mono<Permission> {
@@ -289,10 +290,17 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
     }
 
     private fun next(httpHeaders : HttpHeaders) : String? {
-        val linkHeaderValue = httpHeaders.getFirst("Link")
+        var linkHeaderValue = httpHeaders.getFirst("Link")
         if (linkHeaderValue == null) {
             return null
         }
+
+        val relPrevToken = """rel="prev", """
+        val index = linkHeaderValue.indexOf(relPrevToken)
+        if (index != -1) {
+            linkHeaderValue = linkHeaderValue.substring(index + relPrevToken.length)
+        }
+
         val nextRegex = """.*?<(.*?)>; rel="next".*""".toRegex()
         if (!linkHeaderValue.matches(nextRegex)) {
             return null

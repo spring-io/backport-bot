@@ -18,7 +18,6 @@ package io.spring.github.api
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
@@ -28,7 +27,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.ByteArrayInputStream
 import java.io.InputStream
-import java.lang.IllegalStateException
 import java.lang.RuntimeException
 import java.net.URI
 import java.util.*
@@ -65,8 +63,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
         return webClient.get()
                 .uri("$baseGitHubUrl/teams/$teamId/memberships/$username")
                 .headers { h -> h.setBearerAuth(accessToken) }
-                .exchange()
-                .flatMap { response ->
+                .exchangeToMono { response ->
                     val status = response.statusCode()
                     if (status == HttpStatus.OK) {
                         Mono.just(true)
@@ -94,9 +91,8 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .toUri()
         return webClient.patch()
                 .uri(uri)
-                .syncBody(body)
-                .exchange()
-                .flatMap { clientResponse ->
+                .bodyValue(body)
+                .exchangeToMono { clientResponse ->
                     val status = clientResponse.statusCode()
                     if (status.is2xxSuccessful)
                         clientResponse.bodyToMono<String>()
@@ -117,9 +113,8 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .toUri()
         return webClient.post()
                 .uri(uri)
-                .syncBody(mapOf(Pair("body", comment)))
-                .exchange()
-                .flatMap { clientResponse ->
+                .bodyValue(mapOf(Pair("body", comment)))
+                .exchangeToMono { clientResponse ->
                     val status = clientResponse.statusCode()
                     if (status.is2xxSuccessful)
                         clientResponse.bodyToMono<String>()
@@ -172,8 +167,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .toUri()
         return webClient.get()
                 .uri(uri)
-                .exchange()
-                .flatMap { clientResponse ->
+                .exchangeToMono { clientResponse ->
                     val status = clientResponse.statusCode()
                     if (status.is2xxSuccessful)
                         clientResponse.bodyToMono<GithubContents>()
@@ -192,9 +186,8 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .toUri()
         return webClient.post()
                 .uri(uri)
-                .syncBody(issue)
-                .exchange()
-                .flatMap { clientResponse ->
+                .bodyValue(issue)
+                .exchangeToMono { clientResponse ->
                     val status = clientResponse.statusCode()
                     if (status.is2xxSuccessful)
                         clientResponse.bodyToMono<CreateIssueResponse>().map {  r -> r.number }
@@ -211,8 +204,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .toUri()
         return webClient.get()
                 .uri(uri)
-                .exchange()
-                .flatMap { clientResponse ->
+                .exchangeToMono { clientResponse ->
                     val status = clientResponse.statusCode()
                     if (status.is2xxSuccessful)
                         clientResponse.bodyToMono<Issue>()

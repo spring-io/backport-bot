@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import reactor.core.publisher.Mono
 import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPath
-import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 @Component
 class DefaultBackportService(val github: GitHubApi) : BackportService {

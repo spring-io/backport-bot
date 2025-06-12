@@ -18,9 +18,14 @@ package io.spring.github.event
 
 import io.spring.github.api.*
 import org.springframework.stereotype.Component
+import org.w3c.dom.Document
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.*
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPath
+import javax.xml.xpath.XPathConstants
+import javax.xml.xpath.XPathFactory
 
 /**
  * @author Rob Winch
@@ -56,13 +61,28 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
 
     private fun findMilestoneTitle(ref: BranchRef): Mono<String> {
         return this.github.findFile(ref, "gradle.properties")
-                .map { input ->
+                .map { file ->
                     val p = Properties()
-                    p.load(input)
-                    val version = p.getProperty("version")
-                    version.replace(".BUILD-SNAPSHOT", "").replace("-SNAPSHOT", "")
+                    p.load(file)
+                    p.getProperty("version")
                 }
-                .switchIfEmpty(Mono.error { IllegalStateException("Cannot find file gradle.properties for $ref") })
+            	.switchIfEmpty(Mono.defer {
+                    this.github.findFile(ref, "pom.xml")
+                    .map { file ->
+                        val builderFactory = DocumentBuilderFactory.newInstance()
+                        val builder = builderFactory.newDocumentBuilder()
+                        val xmlDocument: Document = builder.parse(file)
+
+                        val xPath: XPath = XPathFactory.newInstance().newXPath()
+                        var version = xPath.compile("/project/properties/revision").evaluate(xmlDocument)
+                        if (version == null) {
+                            version = xPath.compile("/project/version").evaluate(xmlDocument)
+                        }
+                        version
+                    }
+                })
+                .map { it.replace(".BUILD-SNAPSHOT", "").replace("-SNAPSHOT", "") }
+                .switchIfEmpty(Mono.error { IllegalStateException("Cannot find 'gradle.properties' or 'pom.xml' for $ref") })
     }
 
     private fun findMilestoneNumberByTitle(repositoryRef: RepositoryRef, title: String): Mono<Int> {

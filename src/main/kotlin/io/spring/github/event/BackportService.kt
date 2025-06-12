@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono
  */
 interface BackportService {
     /**
-     * Gets the milestone number. Typically the title is found from gradle.properites and
+     * Gets the milestone number. Typically, the title is found from gradle.properites, pom.xml and
      * then that is used to find a milestone number by its title.
      */
     fun findMilestoneNumber(branchRef: BranchRef) : Mono<Int>

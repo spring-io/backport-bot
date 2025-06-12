@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import io.spring.github.api.RepositoryRef
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 class PushEvent(val ref : String, val repository : Repository, val pusher : Pusher, val commits : List<Commit> = listOf()) {
     fun getFixCommits() : List<Commit> {
@@ -63,7 +64,8 @@ class PushEvent(val ref : String, val repository : Repository, val pusher : Push
 
 
     data class Commit(val id : String, val message : String) {
-        val r = """.*?(Fixes|Closes):?\s+(gh\-|#)(?<id>\d+)(\r?\n)*""".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+        val r = """.*?(Fixes|Closes):?\s+(gh-|#|(https://github.com/.*/.*/(issues|pull))/)(?<id>\d+)(\r?\n)*"""
+            .toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 
         fun getFixIssueId() : Int? {
             return r.find(message)?.groups?.get("id")?.value?.toInt()

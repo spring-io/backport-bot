@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import org.junit.Test
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 class PushEventTest {
+
     @Test
     fun getFixedIssueIdsWhenOnlyFixesThenFindValue() {
         val e = pushEvent("Fixes: gh-123")
@@ -104,6 +106,18 @@ class PushEventTest {
                 "\n" +
                 "(cherry picked from commit 9837ec5)")
         assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(22261)
+    }
+
+    @Test
+    fun getFixedIssueIdWhenSubjectAndIssueLinkThenFindValues() {
+        val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/issues/123")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+    }
+
+    @Test
+    fun getFixedIssueIdWhenSubjectAndPullRequestLinkThenFindValues() {
+        val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/pull/123")
+        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
     }
 
     fun pushEvent(commitMessage : String) : PushEvent {

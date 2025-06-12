@@ -55,4 +55,5 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 	testImplementation("org.skyscreamer:jsonassert")
+	testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }

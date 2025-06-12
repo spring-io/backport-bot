@@ -148,7 +148,7 @@ class WebClientGitHubApiTest {
         assertThat(this.github.findMilestoneNumberByTitle(repository, "v1.0").block()).isEqualTo(1)
 
         val findMilestoneRequest = server.takeRequest()
-        assertThat(findMilestoneRequest.method).isEqualTo(HttpMethod.GET.name);
+        assertThat(findMilestoneRequest.method).isEqualTo(HttpMethod.GET.name());
         assertThat(findMilestoneRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/milestones")
     }
 
@@ -236,7 +236,7 @@ class WebClientGitHubApiTest {
         assertThat(this.github.findMilestoneNumberByTitle(repository, "v2.0").block()).isEqualTo(2)
 
         val findMilestoneRequest = server.takeRequest()
-        assertThat(findMilestoneRequest.method).isEqualTo(HttpMethod.GET.name);
+        assertThat(findMilestoneRequest.method).isEqualTo(HttpMethod.GET.name());
         assertThat(findMilestoneRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/milestones")
     }
 
@@ -545,7 +545,7 @@ class WebClientGitHubApiTest {
                 .verifyComplete()
 
         val createIssueRequest = server.takeRequest()
-        assertThat(createIssueRequest.method).isEqualTo(HttpMethod.POST.name);
+        assertThat(createIssueRequest.method).isEqualTo(HttpMethod.POST.name());
         assertThat(createIssueRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues")
         JSONAssert.assertEquals("""{"title":"Title","body":"Body","milestone":1,"labels":["label"],"assignees":["rwinch"]}""", createIssueRequest.body.readUtf8(), true)
     }
@@ -724,7 +724,7 @@ class WebClientGitHubApiTest {
             .verifyComplete()
 
         val request = server.takeRequest()
-        assertThat(request.method).isEqualTo(HttpMethod.PATCH.name);
+        assertThat(request.method).isEqualTo(HttpMethod.PATCH.name());
         assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347")
         JSONAssert.assertEquals("""{"state":"closed"}""", request.body.readUtf8(), true)
     }
@@ -894,7 +894,7 @@ class WebClientGitHubApiTest {
 
         val request = server.takeRequest()
         assertThat(request.requestUrl?.toUrl()?.toExternalForm()).isEqualTo("${baseUrl}repos/${issue.repository.fullName}/issues/${issue.number}")
-        assertThat(request.method).isEqualTo(HttpMethod.PATCH.name)
+        assertThat(request.method).isEqualTo(HttpMethod.PATCH.name())
         JSONAssert.assertEquals("""{labels: ["bugs"]}""", request.body.readUtf8(), true)
     }
 
@@ -935,7 +935,7 @@ class WebClientGitHubApiTest {
                 .verifyComplete()
 
         val request = server.takeRequest()
-        assertThat(request.method).isEqualTo(HttpMethod.POST.name);
+        assertThat(request.method).isEqualTo(HttpMethod.POST.name());
         assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347/comments")
         JSONAssert.assertEquals("""{"body":"Me too"}""", request.body.readUtf8(), true)
     }
@@ -1108,7 +1108,7 @@ class WebClientGitHubApiTest {
             .verifyComplete()
 
         val findIssueRequest = server.takeRequest()
-        assertThat(findIssueRequest.method).isEqualTo(HttpMethod.GET.name);
+        assertThat(findIssueRequest.method).isEqualTo(HttpMethod.GET.name());
         assertThat(findIssueRequest.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/issues/1347")
     }
 
@@ -1148,7 +1148,7 @@ class WebClientGitHubApiTest {
                 .verifyComplete()
 
         val request = server.takeRequest()
-        assertThat(request.method).isEqualTo(HttpMethod.GET.name);
+        assertThat(request.method).isEqualTo(HttpMethod.GET.name());
         assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
     }
 
@@ -1160,7 +1160,7 @@ class WebClientGitHubApiTest {
             .verifyErrorSatisfies { e -> assertThat(e).hasMessage("Could not get file README.md for BranchRef(repository=RepositoryRef(fullName=rwinch/repository), ref=refs/heads/main) Got status 404 NOT_FOUND and body <empty body>") }
 
         val request = server.takeRequest()
-        assertThat(request.method).isEqualTo(HttpMethod.GET.name);
+        assertThat(request.method).isEqualTo(HttpMethod.GET.name());
         assertThat(request.requestUrl?.toUrl()?.toExternalForm()).endsWith("/repos/rwinch/repository/contents/README.md?ref=refs/heads/main")
     }
 

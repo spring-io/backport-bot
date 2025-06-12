@@ -17,9 +17,13 @@
 package io.spring.github
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.spring.github.event.*
+import io.spring.github.event.GitHubHooksController
 import io.spring.github.event.GitHubHooksController.Result.CREATED
 import io.spring.github.event.GitHubHooksController.Result.OK
+import io.spring.github.event.GithubEventService
+import io.spring.github.event.IssueEvent
+import io.spring.github.event.PullRequestEvent
+import io.spring.github.event.PushEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import org.junit.jupiter.api.Test
@@ -29,64 +33,72 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import reactor.core.publisher.Mono
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 @SpringBootTest
-@TestPropertySource(properties = arrayOf("github.accessToken=some-secret"))
+@TestPropertySource(properties = ["github.accessToken=some-secret"])
 class GithubHooksControllerTest {
-    @MockBean
-    lateinit var  events : GithubEventService
-    @MockBean
-    lateinit var  runner : BackportBotCommandLineRunner
-    @Autowired
-    lateinit var controller : GitHubHooksController
-    @Autowired
-    lateinit var objectMapper : ObjectMapper
 
-    // pull_request
+	@MockitoBean
+	lateinit var events: GithubEventService
 
-    @Test
-    fun githubPullRequestEventWhenLabeledAndNotBackportThenCreated() {
-        whenever(events.backport(any<PullRequestEvent>())).thenReturn(Mono.just(true))
-        assertThat(runWithArgs(pullRequestRequest(pullRequestLabeledBody))).isEqualTo(CREATED)
+	@MockitoBean
+	lateinit var runner: BackportBotCommandLineRunner
 
-        val a = argumentCaptor<PullRequestEvent>()
-        verify(events).backport(a.capture())
+	@Autowired
+	lateinit var controller: GitHubHooksController
 
-        val e = a.firstValue
-        assertThat(e.action).isEqualTo("labeled")
-        assertThat(e.label!!.name).isEqualTo("for: backport-to-1.1.x")
-        assertThat(e.pullRequest.labels.map { it.name }).containsOnly("for: backport-to-1.0.x", "for: backport-to-1.1.x")
-        assertThat(e.pullRequest.number).isEqualTo(156)
-        assertThat(e.pullRequest.title).isEqualTo("Here it is")
-        assertThat(e.repository.fullName).isEqualTo("rwinch/deleteme-backport-test")
-    }
+	@Autowired
+	lateinit var objectMapper: ObjectMapper
 
-    // issues
+	// pull_request
 
-    @Test
-    fun githubIssuesEventWhenLabeledAndNotBackportThenOk() {
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(issueLabeledBody))).isEqualTo(OK)
-    }
+	@Test
+	fun githubPullRequestEventWhenLabeledAndNotBackportThenCreated() {
+		whenever(events.backport(any<PullRequestEvent>())).thenReturn(Mono.just(true))
+		assertThat(runWithArgs(pullRequestRequest(pullRequestLabeledBody))).isEqualTo(CREATED)
 
-    @Test
-    fun githubIssuesEventWhenLabeledAndNotBackportThenCreated() {
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(true));
-        assertThat(runWithArgs(issuesRequest(issueLabeledBody))).isEqualTo(CREATED)
-    }
+		val a = argumentCaptor<PullRequestEvent>()
+		verify(events).backport(a.capture())
+
+		val e = a.firstValue
+		assertThat(e.action).isEqualTo("labeled")
+		assertThat(e.label!!.name).isEqualTo("for: backport-to-1.1.x")
+		assertThat(e.pullRequest.labels.map { it.name }).containsOnly(
+			"for: backport-to-1.0.x",
+			"for: backport-to-1.1.x"
+		)
+		assertThat(e.pullRequest.number).isEqualTo(156)
+		assertThat(e.pullRequest.title).isEqualTo("Here it is")
+		assertThat(e.repository.fullName).isEqualTo("rwinch/deleteme-backport-test")
+	}
+
+	// issues
+
+	@Test
+	fun githubIssuesEventWhenLabeledAndNotBackportThenOk() {
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(issueLabeledBody))).isEqualTo(OK)
+	}
+
+	@Test
+	fun githubIssuesEventWhenLabeledAndNotBackportThenCreated() {
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(true));
+		assertThat(runWithArgs(issuesRequest(issueLabeledBody))).isEqualTo(CREATED)
+	}
 
 
-    // issues/action that we don't care about (validate doesn't cause parsing error)
+	// issues/action that we don't care about (validate doesn't cause parsing error)
 
-    @Test
-    fun githubIssuesEventWhenOpenedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenOpenedThenOk() {
+		val body = """
         {
           "action": "opened",
           "issue": {
@@ -252,13 +264,13 @@ class GithubHooksControllerTest {
           }
         }
         """.trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenEditedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenEditedThenOk() {
+		val body = """
         {
           "action": "edited",
           "issue": {
@@ -433,13 +445,13 @@ class GithubHooksControllerTest {
           }
         }
         """.trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenDeletedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenDeletedThenOk() {
+		val body = """
         {
           "action": "deleted",
           "issue": {
@@ -604,13 +616,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenTransferedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenTransferedThenOk() {
+		val body = """
         {
           "action": "demilestoned",
           "issue": {
@@ -775,13 +787,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenPinnedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenPinnedThenOk() {
+		val body = """
         {
           "action": "pinned",
           "issue": {
@@ -947,13 +959,13 @@ class GithubHooksControllerTest {
           }
         }
         """.trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenUnpinnedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenUnpinnedThenOk() {
+		val body = """
         {
           "action": "unpinned",
           "issue": {
@@ -1118,13 +1130,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenClosedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenClosedThenOk() {
+		val body = """
         {
           "action": "closed",
           "issue": {
@@ -1289,13 +1301,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenReopenedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenReopenedThenOk() {
+		val body = """
         {
           "action": "reopened",
           "issue": {
@@ -1460,13 +1472,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenAssignedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenAssignedThenOk() {
+		val body = """
         {
           "action": "assigned",
           "issue": {
@@ -1689,13 +1701,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenUnassignedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenUnassignedThenOk() {
+		val body = """
         {
           "action": "unassigned",
           "issue": {
@@ -1880,15 +1892,15 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    // labeled is one we actually care about
+	// labeled is one we actually care about
 
-    @Test
-    fun githubIssuesEventWhenUnlabeledThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenUnlabeledThenOk() {
+		val body = """
         {
           "action": "unlabeled",
           "issue": {
@@ -2061,13 +2073,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenMilestonedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenMilestonedThenOk() {
+		val body = """
         {
           "action": "milestoned",
           "issue": {
@@ -2268,13 +2280,13 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubIssuesEventWhenDemilestonedThenOk() {
-        val body = """
+	@Test
+	fun githubIssuesEventWhenDemilestonedThenOk() {
+		val body = """
         {
           "action": "demilestoned",
           "issue": {
@@ -2439,65 +2451,68 @@ class GithubHooksControllerTest {
             "site_admin": false
           }
         }""".trimIndent()
-        whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
-    }
+		whenever(events.backport(any<IssueEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(issuesRequest(body))).isEqualTo(OK)
+	}
 
-    //
-    @Test
-    fun githubInvalidEventThenNotFound() {
-        assertThatIllegalArgumentException().isThrownBy { runWithArgs(listOf("--invalid", "content")) }
-    }
+	//
+	@Test
+	fun githubInvalidEventThenNotFound() {
+		assertThatIllegalArgumentException().isThrownBy { runWithArgs(listOf("--invalid", "content")) }
+	}
 
-    @Test
-    fun githubPushEventWhenValidBodyThenPushEventValid() {
-        whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(true));
-        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(CREATED)
+	@Test
+	fun githubPushEventWhenValidBodyThenPushEventValid() {
+		whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(true));
+		assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(CREATED)
 
-        argumentCaptor<PushEvent>().apply {
-            verify(events).backport(capture())
+		argumentCaptor<PushEvent>().apply {
+			verify(events).backport(capture())
 
-            val e = firstValue
-            assertThat(e.ref).isEqualTo("refs/heads/main")
-            assertThat(e.repository.fullName).isEqualTo("spring-projects/spring-security")
-            assertThat(e.pusher.name).isEqualTo("rwinch")
-            assertThat(e.commits.map { c -> c.message }).containsExactly("Fixed Git SCM book link")
-            assertThat(e.commits.map { c -> c.id }).containsExactly("60fc5381fe9f094e56bbb279b857eaec318f5c0f")
-        }
-    }
+			val e = firstValue
+			assertThat(e.ref).isEqualTo("refs/heads/main")
+			assertThat(e.repository.fullName).isEqualTo("spring-projects/spring-security")
+			assertThat(e.pusher.name).isEqualTo("rwinch")
+			assertThat(e.commits.map { c -> c.message }).containsExactly("Fixed Git SCM book link")
+			assertThat(e.commits.map { c -> c.id }).containsExactly("60fc5381fe9f094e56bbb279b857eaec318f5c0f")
+		}
+	}
 
-    @Test
-    fun githubPushEventWhenBackportTrueThenCreated() {
-        whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(true));
-        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(CREATED)
-    }
+	@Test
+	fun githubPushEventWhenBackportTrueThenCreated() {
+		whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(true));
+		assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(CREATED)
+	}
 
-    @Test
-    fun githubPushEventWhenBackportFalseThenOk() {
-        whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(false));
-        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(OK)
-    }
+	@Test
+	fun githubPushEventWhenBackportFalseThenOk() {
+		whenever(events.backport(any<PushEvent>())).thenReturn(Mono.just(false));
+		assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(OK)
+	}
 
-    @Test
-    fun githubPushEventWhenBackportEmptyThenOk() {
-        whenever(events.backport(any<PushEvent>())).thenReturn(Mono.empty());
-        assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(OK)
-    }
+	@Test
+	fun githubPushEventWhenBackportEmptyThenOk() {
+		whenever(events.backport(any<PushEvent>())).thenReturn(Mono.empty());
+		assertThat(runWithArgs(pushRequest(pushEventBody))).isEqualTo(OK)
+	}
 
-    fun runWithArgs(args : List<String>) : GitHubHooksController.Result {
-        val runner = BackportBotCommandLineRunner(this.controller, this.objectMapper)
+	fun runWithArgs(args: List<String>): GitHubHooksController.Result {
+		val runner = BackportBotCommandLineRunner(this.controller, this.objectMapper)
 
-        runner.run(*args.toTypedArray())
-        return runner.created
-    }
+		runner.run(*args.toTypedArray())
+		return runner.created
+	}
 
-    private fun pushRequest(content: String) = listOf("--github.accessToken=some-secret","--github.event_name", "push", "--github.event", content)
+	private fun pushRequest(content: String) =
+		listOf("--github.accessToken=some-secret", "--github.event_name", "push", "--github.event", content)
 
-    private fun issuesRequest(content: String) = listOf("--github.accessToken=some-secret","--github.event_name", "issues", "--github.event", content)
+	private fun issuesRequest(content: String) =
+		listOf("--github.accessToken=some-secret", "--github.event_name", "issues", "--github.event", content)
 
-    private fun pullRequestRequest(content: String) = listOf("--github.accessToken=some-secret","--github.event_name", "pull_request", "--github.event", content)
+	private fun pullRequestRequest(content: String) =
+		listOf("--github.accessToken=some-secret", "--github.event_name", "pull_request", "--github.event", content)
 
-    val issueLabeledBody = """
+	val issueLabeledBody = """
     {
       "action": "labeled",
       "issue": {
@@ -2678,7 +2693,7 @@ class GithubHooksControllerTest {
       }
     }"""
 
-    val pullRequestLabeledBody = """{
+	val pullRequestLabeledBody = """{
   "action": "labeled",
   "number": 156,
   "pull_request": {
@@ -3153,7 +3168,7 @@ class GithubHooksControllerTest {
   }
 }"""
 
-    val pushEventBody = """
+	val pushEventBody = """
         {
           "ref": "refs/heads/main",
           "before": "2cb8794e355e94c0568f1085d51986e76ad2a204",

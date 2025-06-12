@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.spring.github
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 /**
  * @author Rob Winch
@@ -25,7 +25,7 @@ import org.junit.Test
 class RegexTest {
     @Test
     fun regex() {
-        val r = """Fixes: gh\-\d+""".toRegex()
+        val r = """Fixes: gh-\d+""".toRegex()
         assertThat(r.containsMatchIn("Hi\n\nHello\r\n\r\nFixes: gh-123")).isTrue()
     }
 }

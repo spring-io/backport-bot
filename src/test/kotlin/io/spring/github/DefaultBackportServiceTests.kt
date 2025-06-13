@@ -23,6 +23,8 @@ import io.spring.github.event.IssueEvent
 import io.spring.github.event.PushEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
@@ -101,8 +103,11 @@ class DefaultBackportServiceTests {
 
     @Test
     fun findMilestoneNumberWhenFindFileEmptyThenError() {
-        whenever(github.findFile(branchRef, "gradle.properties")).thenReturn(Mono.empty())
-        whenever(github.findFile(branchRef, "pom.xml")).thenReturn(Mono.empty())
+        whenever(github.findFile(branchRef, "gradle.properties"))
+            .thenReturn(Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "'gradle.properties' file not found")))
+
+        whenever(github.findFile(branchRef, "pom.xml"))
+            .thenReturn(Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "'pom.xml' file not found")))
 
         StepVerifier.create(backport.findMilestoneNumber(branchRef))
             .verifyErrorSatisfies {e -> assertThat(e).hasMessage("Cannot find 'gradle.properties' or 'pom.xml' for BranchRef(repository=RepositoryRef(fullName=rwinch/test), ref=1.0.x)")}
@@ -110,7 +115,8 @@ class DefaultBackportServiceTests {
 
     @Test
     fun findMavenMilestoneNumber() {
-        whenever(github.findFile(branchRef, "gradle.properties")).thenReturn(Mono.empty())
+        whenever(github.findFile(branchRef, "gradle.properties"))
+            .thenReturn(Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "'gradle.properties' file not found")))
         whenever(github.findFile(branchRef, "pom.xml"))
             .thenReturn(Mono.just("""
                 <?xml version="1.0" encoding="UTF-8"?>

@@ -66,23 +66,25 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
                     p.load(file)
                     p.getProperty("version")
                 }
-            	.switchIfEmpty(Mono.defer {
-                    this.github.findFile(ref, "pom.xml")
-                    .map { file ->
-                        val builderFactory = DocumentBuilderFactory.newInstance()
-                        val builder = builderFactory.newDocumentBuilder()
-                        val xmlDocument: Document = builder.parse(file)
+            	.onErrorResume { _ ->
+                    Mono.defer {
+                        this.github.findFile(ref, "pom.xml")
+                            .map { file ->
+                                val builderFactory = DocumentBuilderFactory.newInstance()
+                                val builder = builderFactory.newDocumentBuilder()
+                                val xmlDocument: Document = builder.parse(file)
 
-                        val xPath: XPath = XPathFactory.newInstance().newXPath()
-                        var version = xPath.compile("/project/properties/revision").evaluate(xmlDocument)
-                        if (version == null) {
-                            version = xPath.compile("/project/version").evaluate(xmlDocument)
-                        }
-                        version
+                                val xPath: XPath = XPathFactory.newInstance().newXPath()
+                                var version = xPath.compile("/project/properties/revision").evaluate(xmlDocument)
+                                if (version == null) {
+                                    version = xPath.compile("/project/version").evaluate(xmlDocument)
+                                }
+                                version
+                            }
                     }
-                })
+                }
                 .map { it.replace(".BUILD-SNAPSHOT", "").replace("-SNAPSHOT", "") }
-                .switchIfEmpty(Mono.error { IllegalStateException("Cannot find 'gradle.properties' or 'pom.xml' for $ref") })
+                .onErrorResume { e -> Mono.error { IllegalStateException("Cannot find 'gradle.properties' or 'pom.xml' for $ref", e) }}
     }
 
     private fun findMilestoneNumberByTitle(repositoryRef: RepositoryRef, title: String): Mono<Int> {

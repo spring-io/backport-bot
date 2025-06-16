@@ -114,7 +114,7 @@ class DefaultBackportServiceTests {
     }
 
     @Test
-    fun findMavenMilestoneNumber() {
+    fun findMavenMilestoneNumberFromRevisionProperty() {
         whenever(github.findFile(branchRef, "gradle.properties"))
             .thenReturn(Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "'gradle.properties' file not found")))
         whenever(github.findFile(branchRef, "pom.xml"))
@@ -124,6 +124,24 @@ class DefaultBackportServiceTests {
                 	<properties>
                 		<revision>1.1.0-SNAPSHOT</revision>
                 	</properties>
+                </project>
+            """.trimIndent().byteInputStream(Charset.defaultCharset())))
+        whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0")).thenReturn(Mono.just(1))
+
+        StepVerifier.create(backport.findMilestoneNumber(branchRef))
+            .expectNext(1)
+            .verifyComplete()
+    }
+
+    @Test
+    fun findMavenMilestoneNumberFromVersionTag() {
+        whenever(github.findFile(branchRef, "gradle.properties"))
+            .thenReturn(Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "'gradle.properties' file not found")))
+        whenever(github.findFile(branchRef, "pom.xml"))
+            .thenReturn(Mono.just("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <project>
+                	<version>1.1.0-SNAPSHOT</version>
                 </project>
             """.trimIndent().byteInputStream(Charset.defaultCharset())))
         whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0")).thenReturn(Mono.just(1))

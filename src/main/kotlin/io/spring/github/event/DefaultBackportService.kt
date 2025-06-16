@@ -18,6 +18,7 @@ package io.spring.github.event
 
 import io.spring.github.api.*
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 import org.w3c.dom.Document
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -33,7 +34,7 @@ import javax.xml.xpath.XPathFactory
 @Component
 class DefaultBackportService(val github: GitHubApi) : BackportService {
 
-    val backportLabelMatcher = "for: backport\\-to\\-(?<branch>.*?)".toRegex()
+    val backportLabelMatcher = "for: backport-to-(?<branch>.*?)".toRegex()
 
     val LABEL_STATUS_BACKPORTED = "status: backported"
 
@@ -76,7 +77,7 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
 
                                 val xPath: XPath = XPathFactory.newInstance().newXPath()
                                 var version = xPath.compile("/project/properties/revision").evaluate(xmlDocument)
-                                if (version == null) {
+                                if (!StringUtils.hasText(version)) {
                                     version = xPath.compile("/project/version").evaluate(xmlDocument)
                                 }
                                 version
@@ -118,8 +119,8 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
     private fun findBackportedIssueForMilestoneNumberFromTimeline(issueRef: IssueRef, milestoneNumber: Int): Mono<IssueRef> {
         return github.findIssueTimeline(issueRef)
                 .filter { e -> e.event == "cross-referenced" }
-                .filter { e -> e.source?.issue?.milestone?.number == milestoneNumber }
-                .filter { e -> e.source?.issue?.body == "Backport of gh-${issueRef.number}" }
+                .filter { e -> e.source?.issue?.milestone?.number == milestoneNumber
+                        && e.source.issue.body == "Backport of gh-${issueRef.number}" }
                 .map { e -> e.source?.issue?.number!! }
                 .next()
                 .map { issueNumber -> IssueRef(issueRef.repository, issueNumber) }

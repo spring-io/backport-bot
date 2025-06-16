@@ -35,7 +35,7 @@ import java.util.*
  * @author Rob Winch
  * @author Artem Bilan
  */
-class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val baseGitHubUrl: String = "https://api.github.com") : GitHubApi {
+class WebClientGitHubApi(private val webClient: WebClient = WebClient.create(), val baseGitHubUrl: String = "https://api.github.com") : GitHubApi {
     override fun getPermissionForDefaultLogin(repositoryRef: RepositoryRef, accessToken: String): Mono<Permission> {
         return defaultGitHubLogin()
                 .flatMap { login -> getPermissionForLogin(repositoryRef, login, accessToken) }
@@ -47,7 +47,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .headers { h -> h.setBearerAuth(accessToken)}
                 .retrieve()
                 .bodyToMono<Map<String,Any>>()
-                .map { body -> body.get("permission")?.toString()!! }
+                .map { body -> body["permission"]?.toString()!! }
                 .map { p -> Permission(login, p) }
     }
 
@@ -56,7 +56,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .uri("$baseGitHubUrl/user")
                 .retrieve()
                 .bodyToMono<Map<String,Any>>()
-                .map { body -> body.get("login")?.toString() }
+                .mapNotNull { body -> body["login"]?.toString() }
     }
 
     override fun isMemberOfTeam(username: String, teamId: Int, accessToken: String): Mono<Boolean> {
@@ -131,7 +131,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
                 .toUri()
         return exchange(uri)
                 .flatMapMany(milestoneNumber())
-                .filter { r -> r.title.equals(title) }
+                .filter { r -> r.title == title }
                 .next()
                 .map { r -> r.number }
     }
@@ -282,10 +282,7 @@ class WebClientGitHubApi(val webClient: WebClient = WebClient.create(), val base
     }
 
     private fun next(httpHeaders : HttpHeaders) : String? {
-        var linkHeaderValue = httpHeaders.getFirst("Link")
-        if (linkHeaderValue == null) {
-            return null
-        }
+        var linkHeaderValue = httpHeaders.getFirst("Link") ?: return null
 
         val relPrevToken = """rel="prev", """
         val index = linkHeaderValue.indexOf(relPrevToken)

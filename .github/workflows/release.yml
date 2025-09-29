@@ -6,7 +6,6 @@ on:
 
 jobs:
   build-and-release:
-    name: 'Build'
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v5
@@ -16,7 +15,7 @@ jobs:
         with:
           java-version: 17
 
-      - run: ./gradlew clean build
+      - run: ./gradlew build
 
       - uses: softprops/action-gh-release@v2
         with:

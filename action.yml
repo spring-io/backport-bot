@@ -14,17 +14,17 @@ runs:
         distribution: temurin
         java-version: 17
 
-    - name: Download Backport Bot jar from release asset
+    - name: Download Backport Bot jar and run
       shell: bash
-      run: gh release download "${{ github.action_ref }}" --repo "$GITHUB_REPOSITORY" --pattern "backport-bot-*.jar"
+      run: |
+        gh release download "$ACTION_VERSION" --repo "$GITHUB_REPOSITORY" --pattern "backport-bot-*.jar"
+        
+        java -jar backport-bot-"$ACTION_VERSION".jar \
+              --github.accessToken="GH_TOKEN" \
+              --github.event_name="$GITHUB_EVENT_NAME" \
+              --github.event="$GITHUB_EVENT"
       env:
         GH_TOKEN: ${{ inputs.token }}
-
-    - name: Run Backport Bot jar
-      shell: bash
-      run: java -jar backport-bot-${{ github.action_ref }}.jar \
-        --github.accessToken="${{ inputs.token }}" \
-        --github.event_name="${{ github.event_name }}" \
-        --github.event="${{ toJSON(github.event) }}"
-      env:
+        ACTION_VERSION: ${{ github.action_ref }}
+        GITHUB_EVENT: ${{ toJSON(github.event) }}
         SPRING_MAIN_BANNERMODE: off

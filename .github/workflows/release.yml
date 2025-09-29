@@ -1,0 +1,20 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    name: 'Build'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: spring-io/spring-gradle-build-action@v2
+        with:
+          java-version: 17
+
+      - run: ./gradlew clean build
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: build/libs/*.jar

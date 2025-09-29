@@ -8,7 +8,6 @@ plugins {
 }
 
 group = "io.spring"
-version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 tasks.withType<KotlinCompile> {
@@ -40,4 +39,8 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 	testImplementation("org.skyscreamer:jsonassert")
+}
+
+tasks.getByName<Jar>("jar") {
+	enabled = false
 }

@@ -16,13 +16,13 @@ runs:
 
     - name: Download Backport Bot jar from release asset
       shell: bash
+      run: gh release download "${{ github.action_ref }}" --repo "$GITHUB_REPOSITORY" --pattern "backport-bot-*.jar"
       env:
-        GH_TOKEN: ${{ github.token }}
-      run: gh release download " ${{ github.action_ref }}" --repo "$GITHUB_REPOSITORY" --pattern "*.jar"
+        GH_TOKEN: ${{ inputs.token }}
 
     - name: Run Backport Bot jar
       shell: bash
-      run: exec java -jar "$(ls -1 *.jar | head -n1)" \
+      run: java -jar backport-bot-${{ github.action_ref }}.jar \
         --github.accessToken="${{ inputs.token }}" \
         --github.event_name="${{ github.event_name }}" \
         --github.event="${{ toJSON(github.event) }}"

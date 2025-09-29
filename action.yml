@@ -1,0 +1,24 @@
+name: 'Run Backport Bot'
+description: 'Run Backport Bot'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v5
+      with:
+        show-progress: false
+
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Download Backport Bot jar from release asset
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release download " ${{ github.action_ref }}" --repo "$GITHUB_REPOSITORY" --pattern "*.jar"
+
+    - name: Run Backport Bot jar
+      shell: bash
+      run: exec java -jar "$(ls -1 *.jar | head -n1)"

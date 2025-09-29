@@ -17,10 +17,12 @@ runs:
     - name: Download Backport Bot jar and run
       shell: bash
       run: |
-        gh release download "$ACTION_VERSION" --repo "$GITHUB_REPOSITORY" --pattern "backport-bot-*.jar"
+        gh release download "$ACTION_VERSION" --repo spring-io/backport-bot --pattern "backport-bot-*.jar"
         
-        java -jar backport-bot-"$ACTION_VERSION".jar \
-              --github.accessToken="GH_TOKEN" \
+        jars=( ./*.jar )
+
+        java -jar "${jars[0]}" \
+              --github.accessToken="$GH_TOKEN" \
               --github.event_name="$GITHUB_EVENT_NAME" \
               --github.event="$GITHUB_EVENT"
       env:

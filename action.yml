@@ -1,6 +1,11 @@
 name: 'Run Backport Bot'
 description: 'Run Backport Bot'
 
+inputs:
+  token:
+    description: 'A GitHub token for gh api calls'
+    required: true
+
 runs:
   using: composite
   steps:
@@ -17,4 +22,9 @@ runs:
 
     - name: Run Backport Bot jar
       shell: bash
-      run: exec java -jar "$(ls -1 *.jar | head -n1)"
+      run: exec java -jar "$(ls -1 *.jar | head -n1)" \
+        --github.accessToken="${{ inputs.token }}" \
+        --github.event_name="${{ github.event_name }}" \
+        --github.event="${{ toJSON(github.event) }}"
+      env:
+        SPRING_MAIN_BANNERMODE: off

@@ -23,8 +23,8 @@ runs:
 
         java -jar "${jars[0]}" \
               --github.accessToken="$GH_TOKEN" \
-              --github.event_name="$GITHUB_EVENT_NAME" \
-              --github.event="$GITHUB_EVENT"
+              --github.event_name "$GITHUB_EVENT_NAME" \
+              --github.event "$GITHUB_EVENT"
       env:
         GH_TOKEN: ${{ inputs.token }}
         ACTION_VERSION: ${{ github.action_ref }}

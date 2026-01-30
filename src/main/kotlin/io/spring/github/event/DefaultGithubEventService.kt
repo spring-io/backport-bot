@@ -17,6 +17,8 @@
 package io.spring.github.event
 
 import io.spring.github.api.*
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -26,7 +28,11 @@ import reactor.core.publisher.Mono
  */
 @Component
 class DefaultGithubEventService(val backport : BackportService) : GithubEventService {
-    override fun backport(issueEvent: IssueEvent): Mono<Boolean> {
+
+	private val logger: Log = LogFactory.getLog(javaClass)
+
+
+	override fun backport(issueEvent: IssueEvent): Mono<Boolean> {
         return findBranchFromLabeledIssueEvent(issueEvent)
             .flatMap { branch ->
                 backport.removeLabel(issueEvent.getIssueRef(), issueEvent.label?.name!!)
@@ -51,7 +57,10 @@ class DefaultGithubEventService(val backport : BackportService) : GithubEventSer
         val issue = IssueRef(branch.repository, issueNumber)
         return backport.findMilestoneNumber(branch)
             .filterWhen { milestoneNumber -> backport.isIssueForMilestone(issue, milestoneNumber).map { isIssue -> !isIssue } }
-            .flatMap { milestoneNumber -> backport.createBackport(issue, milestoneNumber, listOf()).then(Mono.just(true)) }
+            .flatMap { milestoneNumber ->
+				backport.createBackport(issue, milestoneNumber, listOf())
+					.doOnNext { logger.info("Created backport issue: https://github.com/${it.repository.fullName}/issues/${it.number}") }
+					.then(Mono.just(true)) }
             .defaultIfEmpty(false)
     }
 

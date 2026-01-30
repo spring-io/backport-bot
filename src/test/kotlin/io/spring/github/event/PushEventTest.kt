@@ -26,102 +26,125 @@ import org.junit.jupiter.api.Test
  */
 class PushEventTest {
 
-    @Test
-    fun getFixedIssueIdsWhenOnlyFixesThenFindValue() {
-        val e = pushEvent("Fixes: gh-123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenOnlyFixesThenFindValue() {
+		val e = pushEvent("Fixes: gh-123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndFixesThenFindValue() {
-        val e = pushEvent("Subject\n\nFixes: gh-123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndFixesThenFindValue() {
+		val e = pushEvent("Subject\n\nFixes: gh-123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndHashNumberThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes: #123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndHashNumberThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes: #123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndMissingColonThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes gh-123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndMissingColonThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes gh-123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndMutliSpaceThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes:  gh-123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndMutliSpaceThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes:  gh-123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndEndsInNewLineThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes:  gh-123\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndEndsInNewLineThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes:  gh-123\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndEndsInNewLinesThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes:  gh-123\n\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndEndsInNewLinesThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes:  gh-123\n\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndEndsInWindowsNewLineThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes:  gh-123\r\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndEndsInWindowsNewLineThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes:  gh-123\r\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndUsesClosesThenFindValues() {
-        val e = pushEvent("Subject\n\nCloses: gh-123\r\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndUsesClosesThenFindValues() {
+		val e = pushEvent("Subject\n\nCloses: gh-123\r\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndUsesClosesAndNoColonThenFindValues() {
-        val e = pushEvent("Subject\n\nCloses gh-123\r\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndUsesClosesAndNoColonThenFindValues() {
+		val e = pushEvent("Subject\n\nCloses gh-123\r\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenSubjectAndUsesLowercaseClosesThenFindValues() {
-        val e = pushEvent("Subject\n\ncloses gh-123\r\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenSubjectAndUsesLowercaseClosesThenFindValues() {
+		val e = pushEvent("Subject\n\ncloses gh-123\r\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenExtraSpacesThenFindValues() {
-        val e = pushEvent("Subject\n\n  Closes gh-123  \r\n")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdsWhenExtraSpacesThenFindValues() {
+		val e = pushEvent("Subject\n\n  Closes gh-123  \r\n")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdsWhenNotLastLineThenFindValues() {
-        val e = pushEvent("Fix Javadoc typos\n" +
-                "\n" +
-                "Closes gh-22261\n" +
-                "\n" +
-                "(cherry picked from commit 9837ec5)")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(22261)
-    }
+	@Test
+	fun getFixedIssueIdsWhenNotLastLineThenFindValues() {
+		val e = pushEvent(
+			"Fix Javadoc typos\n" +
+					"\n" +
+					"Closes gh-22261\n" +
+					"\n" +
+					"(cherry picked from commit 9837ec5)"
+		)
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(22261)
+	}
 
-    @Test
-    fun getFixedIssueIdWhenSubjectAndIssueLinkThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/issues/123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdWhenSubjectAndIssueLinkThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/issues/123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    @Test
-    fun getFixedIssueIdWhenSubjectAndPullRequestLinkThenFindValues() {
-        val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/pull/123")
-        assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
-    }
+	@Test
+	fun getFixedIssueIdWhenSubjectAndPullRequestLinkThenFindValues() {
+		val e = pushEvent("Subject\n\nFixes: https://github.com/some-org/some-project/pull/123")
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
 
-    fun pushEvent(commitMessage : String) : PushEvent {
-        val commits = listOf(PushEvent.Commit("sha", commitMessage))
-        return PushEvent("main", PushEvent.Repository("spring-projects/spring-security"), PushEvent.Pusher("rwinch"), commits)
-    }
+	@Test
+	fun regexPerLine() {
+		val message = """
+			Subject
+			
+        	Some text
+		
+        	Fixes: #123
+		
+        	More text
+    		"""
+		val e = pushEvent(message)
+		assertThat(e.getFixCommits().map { c -> c.getFixIssueId() }).containsOnly(123)
+	}
+
+
+	fun pushEvent(commitMessage: String): PushEvent {
+		val commits = listOf(PushEvent.Commit("sha", commitMessage))
+		return PushEvent(
+			"main",
+			PushEvent.Repository("spring-projects/spring-security"),
+			PushEvent.Pusher("rwinch"),
+			commits
+		)
+	}
 }

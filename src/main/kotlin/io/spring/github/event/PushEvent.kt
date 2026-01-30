@@ -64,10 +64,10 @@ class PushEvent(val ref : String, val repository : Repository, val pusher : Push
 
 
     data class Commit(val id : String, val message : String) {
-        val r = """.*?(Fixes|Closes):?\s+(gh-|#|(https://github.com/.*/.*/(issues|pull))/)(?<id>\d+)(\r?\n)*"""
-            .toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+		val r = """^\s*(Fixes|Closes):?\s+(gh-|#|(https://github.com/.*/.*/(issues|pull))/)(?<id>\d+)"""
+			.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
 
-        fun getFixIssueId() : Int? {
+		fun getFixIssueId() : Int? {
             return r.find(message)?.groups?.get("id")?.value?.toInt()
         }
     }

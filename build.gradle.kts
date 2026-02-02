@@ -1,19 +1,21 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-	id("org.springframework.boot") version "3.5.0"
+	kotlin("jvm") version "2.2.21"
+	kotlin("plugin.spring") version "2.2.21"
+	id("org.springframework.boot") version "4.0.2"
 	id("io.spring.dependency-management") version "1.1.7"
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
 }
 
 group = "io.spring"
-java.sourceCompatibility = JavaVersion.VERSION_17
 
-tasks.withType<KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "17"
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+kotlin {
+	compilerOptions {
+		freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
 	}
 }
 
@@ -28,17 +30,19 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("tools.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-	testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+	testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
-	testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
 	testImplementation("org.skyscreamer:jsonassert")
+
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.getByName<Jar>("jar") {

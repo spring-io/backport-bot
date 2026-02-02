@@ -120,9 +120,9 @@ class WebClientGitHubApi(
 			.then()
 	}
 
-	private fun <T> error(r: ClientResponse, message: String): Mono<T> {
+	private fun <T : Any> error(r: ClientResponse, message: String): Mono<T> {
 		return r.bodyToMono<String>().defaultIfEmpty("<empty body>")
-			.flatMap { b -> Mono.error<T>(RuntimeException("$message Got status ${r.statusCode()} and body $b")) }
+			.flatMap { b -> Mono.error(RuntimeException("$message Got status ${r.statusCode()} and body $b")) }
 	}
 
 	/**

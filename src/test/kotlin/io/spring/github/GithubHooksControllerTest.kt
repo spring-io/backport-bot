@@ -16,7 +16,6 @@
 
 package io.spring.github
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.spring.github.event.GitHubHooksController
 import io.spring.github.event.GitHubHooksController.Result.CREATED
 import io.spring.github.event.GitHubHooksController.Result.OK
@@ -36,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import reactor.core.publisher.Mono
+import tools.jackson.databind.json.JsonMapper
 
 /**
  * @author Rob Winch
@@ -55,7 +55,7 @@ class GithubHooksControllerTest {
 	lateinit var controller: GitHubHooksController
 
 	@Autowired
-	lateinit var objectMapper: ObjectMapper
+	lateinit var objectMapper: JsonMapper
 
 	// pull_request
 

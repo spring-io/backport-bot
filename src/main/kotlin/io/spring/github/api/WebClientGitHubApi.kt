@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Flux
@@ -155,34 +154,27 @@ class WebClientGitHubApi(
 			.path("/repos/${repositoryRef.fullName}/milestones")
 			.build()
 			.toUri()
-		return exchange(uri)
-			.flatMapMany(milestoneNumber())
+
+		return milestones(uri)
 			.filter { r -> r.title == title }
 			.next()
 			.map { r -> r.number }
 	}
 
-	private fun exchange(uri: URI): Mono<ClientResponse> {
+	private fun milestones(uri: URI): Flux<GitHubMilestone> {
 		return webClient.get()
 			.uri(uri)
-			.exchange()
-	}
-
-	private fun milestoneNumber(): (ClientResponse) -> Flux<GitHubMilestone> {
-		return { clientResponse ->
-			val status = clientResponse.statusCode()
-			if (status.is2xxSuccessful) {
-				val body = clientResponse.bodyToFlux<GitHubMilestone>()
-				val link = next(clientResponse.headers().asHttpHeaders())
+			.retrieve()
+			.toEntityFlux(GitHubMilestone::class.java)
+			.flatMapMany {
+				val body = it.body!!
+				val link = next(it.headers)
 				if (link == null) {
 					body
 				} else {
-					body.concatWith(exchange(URI.create(link)).flatMapMany(milestoneNumber()))
+					body.concatWith(milestones(URI.create(link)))
 				}
-			} else {
-				Flux.concat(error(clientResponse, "Cannot get milestone"))
 			}
-		}
 	}
 
 	/**
@@ -256,32 +248,25 @@ class WebClientGitHubApi(
 			.path("/repos/${issueRef.repository.fullName}/issues/{number}/timeline")
 			.buildAndExpand(issueRef.number)
 			.toUri()
+
 		return findIssueTimeline(uri)
-			.flatMapMany(timelineEvent(issueRef.number))
 	}
 
-	private fun findIssueTimeline(uri: URI): Mono<ClientResponse> {
+	private fun findIssueTimeline(uri: URI): Flux<TimelineEvent> {
 		return webClient.get()
 			.uri(uri)
 			.header("Accept", "application/vnd.github.mockingbird-preview")
-			.exchange()
-	}
-
-	private fun timelineEvent(issueNumber: Int): (ClientResponse) -> Flux<TimelineEvent> {
-		return { e ->
-			val status = e.statusCode()
-			if (status.is2xxSuccessful) {
-				val body = e.bodyToFlux<TimelineEvent>()
-				val link = next(e.headers().asHttpHeaders())
+			.retrieve()
+			.toEntityFlux(TimelineEvent::class.java)
+			.flatMapMany {
+				val body = it.body!!
+				val link = next(it.headers)
 				if (link == null) {
 					body
 				} else {
-					body.concatWith(findIssueTimeline(URI.create(link)).flatMapMany(timelineEvent(issueNumber)))
+					body.concatWith(findIssueTimeline(URI.create(link)))
 				}
-			} else {
-				Flux.concat(error(e, "Cannot not create issue for $issueNumber"))
 			}
-		}
 	}
 
 	/**
@@ -292,31 +277,24 @@ class WebClientGitHubApi(
 			.path("/repos/${repositoryRef.fullName}/labels")
 			.build()
 			.toUri()
+
 		return findLabels(uri)
-			.flatMapMany(label())
 	}
 
-	private fun findLabels(uri: URI): Mono<ClientResponse> {
+	private fun findLabels(uri: URI): Flux<Label> {
 		return webClient.get()
 			.uri(uri)
-			.exchange()
-	}
-
-	private fun label(): (ClientResponse) -> Flux<Label> {
-		return { e ->
-			val status = e.statusCode()
-			if (status.is2xxSuccessful) {
-				val body = e.bodyToFlux<Label>()
-				val link = next(e.headers().asHttpHeaders())
+			.retrieve()
+			.toEntityFlux(Label::class.java)
+			.flatMapMany {
+				val body = it.body!!
+				val link = next(it.headers)
 				if (link == null) {
 					body
 				} else {
-					body.concatWith(findIssueTimeline(URI.create(link)).flatMapMany(label()))
+					body.concatWith(findLabels(URI.create(link)))
 				}
-			} else {
-				Flux.concat(error(e, "Cannot not get the labels"))
 			}
-		}
 	}
 
 	private fun next(httpHeaders: HttpHeaders): String? {

@@ -30,6 +30,7 @@ import reactor.test.StepVerifier
 
 /**
  * @author Rob Winch
+ * @author Artem Bilan
  */
 class WebClientGitHubApiTest {
     private val server = MockWebServer()
@@ -376,7 +377,7 @@ class WebClientGitHubApiTest {
         enqueueNotFound()
 
         StepVerifier.create(this.github.findMilestoneNumberByTitle(repository, "v1.0"))
-                .verifyErrorSatisfies { e -> assertThat(e).hasMessage("Cannot get milestone Got status 404 NOT_FOUND and body <empty body>") }
+                .verifyErrorSatisfies { e -> assertThat(e).hasMessageStartingWith("404 Not Found from GET") }
     }
 
     @Test

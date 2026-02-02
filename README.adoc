@@ -40,11 +40,11 @@ The workflow should be present on every branch that you wish to be supported.
 
 From GItHub's Actions documentation:
 
-> Each workflow run will use the version of the workflow that is present in the associated commit SHA or Git ref of the event. 
+> Each workflow run will use the version of the workflow that is present in the associated commit SHA or Git ref of the event.
 This means that when a commit is pushed to these branches, it will not be processed by the backport bot because the workflow is not defined on those branches.
 
 This can be a bit confusing when you see the https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#running-your-workflow-only-when-a-push-to-specific-branches-occurs[branches] element specify that it should operate only on branches that match `*.x`.
-However, it is important that the branches entry operates as a https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#using-filters[filter] that further reduces the events that are operated on.
+However, it is important that the branches entry operates as a https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#using-filters[filter] that further reduces the events that are operated on.
 It will not process an event that would not otherwise be processed (e.g. if the workflow does not exist on a branch that belongs to the event).
 
 The usage of these types of filters is primarily meant to ensure that when you create new branches that you can prevent accidental invocation of workflows in branches without having to remember to remove the workflow in the branches.
@@ -65,7 +65,7 @@ on:
     branches:
       - '*.x'
 jobs:
-  build:
+  backport-issue:
     permissions:
       contents: read
       issues: write
@@ -78,11 +78,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 ----
 
+Add the workflow to every maintenance branch.
 
-[add-every-branch]
-.Add the Workflow to Every Branch
-****
-
-
-
-****

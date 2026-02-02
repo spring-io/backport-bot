@@ -557,7 +557,7 @@ class WebClientGitHubApiTest {
             .setResponseCode(HttpStatus.UNAUTHORIZED.value()))
 
         StepVerifier.create(this.github.createIssue(CreateIssue(repository, "Title", "Body", 1, listOf("label"), listOf("rwinch"))))
-                .verifyErrorSatisfies { e -> assertThat(e).hasMessage("Cannot not create issue for CreateIssue(ref=RepositoryRef(fullName=rwinch/repository), title=Title, body=Body, milestone=1, labels=[label], assignees=[rwinch]) Got status 401 UNAUTHORIZED Got status 401 UNAUTHORIZED and body <empty body>") }
+                .verifyErrorSatisfies { e -> assertThat(e).hasMessage("Cannot create issue for CreateIssue(ref=RepositoryRef(fullName=rwinch/repository), title=Title, body=Body, milestone=1, labels=[label], assignees=[rwinch]) Got status 401 UNAUTHORIZED Got status 401 UNAUTHORIZED and body <empty body>") }
     }
 
     @Test

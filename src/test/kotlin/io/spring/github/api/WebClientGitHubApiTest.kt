@@ -1425,7 +1425,7 @@ class WebClientGitHubApiTest {
         val timeline = github.findIssueTimeline(issue).collectList().block()!!
 
         assertThat(timeline).hasSize(1)
-        val e = timeline.get(0)!!
+        val e = timeline.get(0)
         assertThat(e.event).isEqualTo("cross-referenced")
         assertThat(e.source?.type).isEqualTo("issue")
         assertThat(e.source?.issue?.body).isEqualTo("Backport of #30")
@@ -1475,7 +1475,7 @@ class WebClientGitHubApiTest {
         val timeline = github.findIssueTimeline(issue).collectList().block()!!
 
         assertThat(timeline).hasSize(1)
-        val e = timeline.get(0)!!
+        val e = timeline.get(0)
         assertThat(e.event).isEqualTo("referenced")
     }
 

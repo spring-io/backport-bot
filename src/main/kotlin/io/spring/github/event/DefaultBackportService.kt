@@ -84,7 +84,7 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
                             }
                     }
                 }
-                .map { it.replace(".BUILD-SNAPSHOT", "").replace("-SNAPSHOT", "") }
+                .map { versionText -> Regex("""^\d+(\.\d+)*""").find(versionText)?.value ?: versionText }
                 .onErrorResume { e -> Mono.error { IllegalStateException("Cannot find 'gradle.properties' or 'pom.xml' for $ref", e) }}
     }
 

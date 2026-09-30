@@ -132,5 +132,12 @@ class DefaultGithubEventService(val backport: BackportService) : GithubEventServ
 		val branchRef = pushEvent.getBranchRef()
 		return this.backport.findBackportBranches(branchRef.repository)
 			.any { branch -> branch == branchRef }
+			.doOnNext { isBackportBranch ->
+				if (!isBackportBranch) {
+					val branchName = branchRef.ref.removePrefix("refs/heads/")
+					logger.warn("No 'for: backport-to-$branchName' label in ${branchRef.repository.fullName}; " +
+							"skipping backport for commits: ${fixedCommits.map { it.id }}")
+				}
+			}
 	}
 }

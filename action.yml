@@ -17,9 +17,10 @@ runs:
     - name: Download Backport Bot jar and run
       shell: bash
       run: |
-        gh release download "$ACTION_VERSION" --repo spring-io/backport-bot --pattern "backport-bot-*.jar"
-        
-        jars=( ./*.jar )
+        work_dir="$(mktemp -d "$RUNNER_TEMP/backport-bot.XXXXXX")"
+        gh release download "$ACTION_VERSION" --repo spring-io/backport-bot --pattern "backport-bot-*.jar" --dir "$work_dir"
+
+        jars=( "$work_dir"/*.jar )
 
         java -jar "${jars[0]}" \
               --github.accessToken="$GH_TOKEN" \

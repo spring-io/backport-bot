@@ -20,6 +20,7 @@ import io.spring.github.api.WebClientGitHubApi
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
+import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @SpringBootApplication
@@ -27,7 +28,11 @@ class BackportBotApplication {
     @Bean
     internal fun webClientGitHubApi(gitHubAccessToken: GitHubAccessToken) : WebClientGitHubApi {
         val webClient = WebClient.builder()
-                .defaultHeaders { headers -> headers.setBearerAuth(gitHubAccessToken.accessToken) }
+                .defaultHeaders { headers ->
+                    headers.setBearerAuth(gitHubAccessToken.accessToken)
+                    headers.accept = listOf(MediaType.parseMediaType("application/vnd.github+json"))
+                    headers.set("X-GitHub-Api-Version", "2026-03-10")
+                }
                 .build()
         return WebClientGitHubApi(webClient)
     }

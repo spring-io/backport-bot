@@ -26,10 +26,6 @@ import java.io.InputStream
  */
 interface GitHubApi {
 
-    fun isMemberOfTeam(username: String, teamId: Int, accessToken: String): Mono<Boolean>
-
-    fun getPermissionForDefaultLogin(repositoryRef: RepositoryRef, accessToken: String): Mono<Permission>
-
     /**
      * Get a milestone number by its title
      */

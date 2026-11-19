@@ -39,56 +39,6 @@ class WebClientGitHubApi(
 ) : GitHubApi {
 
 	/**
-	 * @see https://docs.github.com/en/rest/users/users#get-the-authenticated-user
-	 * @see https://docs.github.com/en/rest/collaborators/collaborators#get-repository-permissions-for-a-user
-	 */
-	override fun getPermissionForDefaultLogin(repositoryRef: RepositoryRef, accessToken: String): Mono<Permission> {
-		return defaultGitHubLogin()
-			.flatMap { login -> getPermissionForLogin(repositoryRef, login, accessToken) }
-	}
-
-	private fun getPermissionForLogin(
-		repositoryRef: RepositoryRef,
-		login: String,
-		accessToken: String
-	): Mono<Permission> {
-		return webClient.get()
-			.uri("$baseGitHubUrl/repos/${repositoryRef.fullName}/collaborators/$login/permission")
-			.headers { h -> h.setBearerAuth(accessToken) }
-			.retrieve()
-			.bodyToMono<Map<String, Any>>()
-			.map { body -> body["permission"]?.toString()!! }
-			.map { p -> Permission(login, p) }
-	}
-
-	private fun defaultGitHubLogin(): Mono<String> {
-		return webClient.get()
-			.uri("$baseGitHubUrl/user")
-			.retrieve()
-			.bodyToMono<Map<String, Any>>()
-			.mapNotNull { body -> body["login"]?.toString() }
-	}
-
-	/**
-	 * @see https://docs.github.com/en/rest/teams/members/#get-team-membership-for-a-user
-	 */
-	override fun isMemberOfTeam(username: String, teamId: Int, accessToken: String): Mono<Boolean> {
-		return webClient.get()
-			.uri("$baseGitHubUrl/teams/$teamId/memberships/$username")
-			.headers { h -> h.setBearerAuth(accessToken) }
-			.exchangeToMono { response ->
-				val status = response.statusCode()
-				if (status == HttpStatus.OK) {
-					Mono.just(true)
-				} else if (status == HttpStatus.NOT_FOUND) {
-					Mono.just(false)
-				} else {
-					error(response, "Failed to determine if $username is a part of $teamId")
-				}
-			}
-	}
-
-	/**
 	 * @see https://docs.github.com/en/rest/issues/issues#update-an-issue
 	 */
 	override fun closeIssue(issueRef: IssueRef): Mono<Void> {
@@ -255,7 +205,6 @@ class WebClientGitHubApi(
 	private fun findIssueTimeline(uri: URI): Flux<TimelineEvent> {
 		return webClient.get()
 			.uri(uri)
-			.header("Accept", "application/vnd.github.mockingbird-preview")
 			.retrieve()
 			.toEntityFlux(TimelineEvent::class.java)
 			.flatMapMany {

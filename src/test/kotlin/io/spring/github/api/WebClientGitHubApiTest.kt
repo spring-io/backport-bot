@@ -19,7 +19,6 @@ package io.spring.github.api
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.http.HttpHeaders
@@ -44,63 +43,6 @@ class WebClientGitHubApiTest {
     private val branch = BranchRef(repository, "refs/heads/main")
 
     private val issue = IssueRef(branch.repository, 1347)
-
-    val teamId = 482984
-
-    val accessToken = "access-token-1"
-
-    @Test
-    fun isMemberOfTeamWhenUserActiveThenTrue() {
-        val body = """{
-            "url": "https://api.github.com/teams/1/memberships/octocat",
-            "role": "member",
-            "state": "active"
-        }"""
-        enqueue(body)
-
-        assertThat(this.github.isMemberOfTeam("rwinch", teamId, accessToken).block()).isTrue()
-    }
-
-    @Test
-    fun isMemberOfTeamWhenUserMaintainerThenTrue() {
-        val body = """{
-            "url": "https://api.github.com/teams/1/memberships/octocat",
-            "role": "maintainer",
-            "state": "active"
-        }"""
-        enqueue(body)
-
-        assertThat(this.github.isMemberOfTeam("rwinch", teamId, accessToken).block()).isTrue()
-    }
-
-    @Test
-    fun isMemberOfTeamWhenUserPendingThenTrue() {
-        val body = """{
-            "url": "https://api.github.com/teams/1/memberships/octocat",
-            "role": "member",
-            "state": "pending"
-        }"""
-        enqueue(body)
-
-        assertThat(this.github.isMemberOfTeam("rwinch", teamId, accessToken).block()).isTrue()
-    }
-
-    @Test
-    fun isMemberOfTeamWhenUserNotMemberThenFalse() {
-        val response = response("").setResponseCode(HttpStatus.NOT_FOUND.value())
-        server.enqueue(response)
-
-        assertThat(this.github.isMemberOfTeam("rwinch", teamId, accessToken).block()).isFalse()
-    }
-
-    @Test
-    fun isMemberOfTeamWhenErrorThenFalse() {
-        val response = response("Oops").setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-        server.enqueue(response)
-
-        assertThatCode { this.github.isMemberOfTeam("rwinch", teamId, accessToken).block() }
-                .hasMessage("Failed to determine if rwinch is a part of 482984 Got status 500 INTERNAL_SERVER_ERROR and body Oops")
-    }
 
     @Test
     fun findMilestoneNumberByTitleWhenFound() {
@@ -1431,9 +1373,6 @@ class WebClientGitHubApiTest {
         assertThat(e.source?.issue?.body).isEqualTo("Backport of #30")
         assertThat(e.source?.issue?.milestone?.number).isEqualTo(3)
         assertThat(e.source?.issue?.milestone?.title).isEqualTo("1.1.0")
-
-        assertThat(server.takeRequest().headers.get("Accept")).isEqualTo("application/vnd.github.mockingbird-preview")
-
     }
 
     @Test

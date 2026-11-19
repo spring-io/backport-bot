@@ -155,9 +155,21 @@ class DefaultBackportServiceTests {
     fun findMilestoneNumberWhenMilestoneNumberNotFound() {
         whenever(github.findFile(branchRef, "gradle.properties")).thenReturn(Mono.just("version=1.1.0.BUILD-SNAPSHOT".byteInputStream(Charset.defaultCharset())))
         whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0")).thenReturn(Mono.empty())
+        whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0.RELEASE")).thenReturn(Mono.empty())
 
         StepVerifier.create(backport.findMilestoneNumber(branchRef))
             .verifyErrorSatisfies {e -> assertThat(e).hasMessage("Cannot find milestone number for title 1.1.0 and RepositoryRef(fullName=rwinch/test)")}
+    }
+
+    @Test
+    fun findMilestoneNumberWhenMilestoneNumberReleaseSuffixFound() {
+        whenever(github.findFile(branchRef, "gradle.properties")).thenReturn(Mono.just("version=1.1.0.BUILD-SNAPSHOT".byteInputStream(Charset.defaultCharset())))
+        whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0")).thenReturn(Mono.empty())
+        whenever(github.findMilestoneNumberByTitle(repositoryRef, "1.1.0.RELEASE")).thenReturn(Mono.just(2))
+
+        StepVerifier.create(backport.findMilestoneNumber(branchRef))
+                .expectNext(2)
+                .verifyComplete()
     }
 
     @Test

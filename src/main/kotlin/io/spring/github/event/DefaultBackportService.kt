@@ -90,6 +90,7 @@ class DefaultBackportService(val github: GitHubApi) : BackportService {
 
     private fun findMilestoneNumberByTitle(repositoryRef: RepositoryRef, title: String): Mono<Int> {
         return github.findMilestoneNumberByTitle(repositoryRef, title)
+                .switchIfEmpty(Mono.defer { github.findMilestoneNumberByTitle(repositoryRef, "$title.RELEASE") })
                 .switchIfEmpty(Mono.error { IllegalStateException("Cannot find milestone number for title $title and $repositoryRef") })
     }
 

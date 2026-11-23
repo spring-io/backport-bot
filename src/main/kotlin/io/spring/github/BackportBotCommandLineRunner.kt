@@ -25,7 +25,7 @@ class BackportBotCommandLineRunner(val controller: GitHubHooksController, val js
 		val action = args[2]
 		val event = args[4]
 		when (action) {
-			"pull_request" -> {
+			"pull_request", "pull_request_target" -> {
 				val pullRequest = this.jsonMapper.readValue(event, PullRequestEvent::class.java)
 				this.created = controller.githubPullRequestEvent(pullRequest)
 			}

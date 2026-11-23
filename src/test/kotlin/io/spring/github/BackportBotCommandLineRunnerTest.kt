@@ -28,6 +28,17 @@ class BackportBotCommandLineRunnerTest {
     }
 
     @Test
+    fun pullRequestTargetLabeled() {
+        val controller : GitHubHooksController = mock()
+        whenever(controller.githubPullRequestEvent(any())).thenReturn(GitHubHooksController.Result.CREATED)
+        val application = SpringApplication(BackportBotApplication::class.java)
+        application.addInitializers(ReplaceBeanInitializer(GitHubHooksController::class.java, controller))
+        application.run("--github.accessToken=some-secret", "--github.event_name", "pull_request_target", "--github_event", pullRequestLabeledBody).use { }
+        val pullRequest = PullRequest(156, "Here it is", null, listOf(PullRequest.Label("for: backport-to-1.0.x"), PullRequest.Label("for: backport-to-1.1.x")))
+        verify(controller).githubPullRequestEvent(PullRequestEvent("labeled", Repository("rwinch/deleteme-backport-test"), PullRequestEvent.Label("for: backport-to-1.1.x"), pullRequest))
+    }
+
+    @Test
     fun issueLabeled() {
         val controller : GitHubHooksController = mock()
         whenever(controller.githubEvent(any())).thenReturn(GitHubHooksController.Result.CREATED)

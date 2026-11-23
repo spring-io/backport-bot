@@ -21,6 +21,12 @@ In either case the following logic is used:
 You can add a label in the form of `for: backport-to-<branch-name>` (i.e. for: backport-to-5.1.x) and
 adding the label to a ticket will create a backport for the branch `<branch-name>` (i.e. 5.1.x).
 
+This works for issues as well as pull requests.
+For pull requests, the workflow must be triggered by `pull_request_target` rather than `pull_request` events.
+For `pull_request` events from forks, GitHub always issues a read-only `GITHUB_TOKEN`, which prevents the BackportBot from updating the pull request and creating the backport issue.
+In contrast, `pull_request_target` events run in the context of the base repository with the permissions declared in the workflow.
+This is safe for the BackportBot, since it never checks out or executes code from the pull request, and only users with triage permissions can add labels.
+
 ==== Pushing to Branch
 
 You can create a backport by pushing to a branch that ends in `.x` with `Fixes: gh-<number>` in the commit message.
@@ -59,7 +65,7 @@ name: Backport Bot
 on:
   issues:
     types: [labeled]
-  pull_request:
+  pull_request_target:
     types: [labeled]
   push:
     branches:
